@@ -17,7 +17,7 @@ public class MoveLeftAction extends AbstractInputAction{
  
 	public void performAction(float time, Event e)
 	{ 	
-		float moveAmount = (float) -0.1;
+		float moveAmount = (float) -0.05;
 		Vector3D viewDir = camera.getRightAxis().normalize();
 		Vector3D curLocVector = new Vector3D(camera.getLocation());
 		Vector3D newLocVec = curLocVector.add(viewDir.mult(moveAmount));
