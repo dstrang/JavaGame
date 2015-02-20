@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/javagaming/jinput/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="C:/javagaming/graphicslib3D/graphicslib3D.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/jbullet/jbullet.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/jinput/jinput.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/jogl/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/jogl/jogl-all.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/luaj/luaj-jme-3.0.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/luaj/luaj-jse-3.0.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/luaj/luaj-sources-3.0.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/ode4j/core-0.3.0.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/vecmath/vecmath.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/sage/sage.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
