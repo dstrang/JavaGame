@@ -1,16 +1,16 @@
 package gameEngine.input.action;
 
+import graphicslib3D.Matrix3D;
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
 import net.java.games.input.Event;
 import sage.camera.ICamera;
 import sage.input.action.AbstractInputAction;
-import samples.SetSpeedAction;
 
-public class MoveForwardAction extends AbstractInputAction{
+public class FlyUpAction extends AbstractInputAction{
 	private ICamera camera;
 	
-	public MoveForwardAction(ICamera c)
+	public FlyUpAction(ICamera c)
 	{ 
 		camera = c;
 	}
@@ -18,9 +18,9 @@ public class MoveForwardAction extends AbstractInputAction{
 	public void performAction(float time, Event e)
 	{ 	
 		float moveAmount = (float) 0.01;
-		Vector3D viewDir = camera.getViewDirection().normalize();
+		Vector3D upAxis = camera.getUpAxis().normalize();
 		Vector3D curLocVector = new Vector3D(camera.getLocation());
-		Vector3D newLocVec = curLocVector.add(viewDir.mult(moveAmount));
+		Vector3D newLocVec = curLocVector.add(upAxis.mult(moveAmount));
 		double newX = newLocVec.getX();
 		double newY = newLocVec.getY();
 		double newZ = newLocVec.getZ();
