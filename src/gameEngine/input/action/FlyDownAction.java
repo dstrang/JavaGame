@@ -17,14 +17,16 @@ public class FlyDownAction extends AbstractInputAction{
  
 	public void performAction(float time, Event e)
 	{ 	
-		float moveAmount = (float) -0.01;
-		Vector3D upAxis = camera.getUpAxis().normalize();
 		Vector3D curLocVector = new Vector3D(camera.getLocation());
-		Vector3D newLocVec = curLocVector.add(upAxis.mult(moveAmount));
-		double newX = newLocVec.getX();
-		double newY = newLocVec.getY();
-		double newZ = newLocVec.getZ();
-		Point3D newLoc = new Point3D(newX, newY, newZ);
-		camera.setLocation(newLoc);
+		if(curLocVector.getY() > 1){
+			float moveAmount = (float) -0.01;
+			Vector3D upAxis = camera.getUpAxis().normalize();
+			Vector3D newLocVec = curLocVector.add(upAxis.mult(moveAmount));
+			double newX = newLocVec.getX();
+			double newY = newLocVec.getY();
+			double newZ = newLocVec.getZ();
+			Point3D newLoc = new Point3D(newX, newY, newZ);
+			camera.setLocation(newLoc);
+		}
 	}
 }

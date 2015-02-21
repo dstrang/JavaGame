@@ -21,7 +21,7 @@ public class TurnLeftAction extends AbstractInputAction{
 		 Vector3D upAxis = camera.getUpAxis();
 		 Vector3D rightAxis = camera.getRightAxis();
 
-		 rotationAmt.rotate(0.05,upAxis);
+		 rotationAmt.rotate(0.1,upAxis);
 		 
 		 viewDirection = viewDirection.mult(rotationAmt);
 		 rightAxis = rightAxis.mult(rotationAmt);

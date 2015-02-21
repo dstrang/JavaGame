@@ -13,6 +13,7 @@ import gameEngine.input.action.TurnUpAction;
 import games.treasureHunt.events.CollectEvent;
 import games.treasureHunt.objects.Coin;
 import games.treasureHunt.objects.Pyramid;
+import games.treasureHunt.objects.TreasureChest;
 import graphicslib3D.Matrix3D;
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
@@ -22,12 +23,11 @@ import java.awt.Color;
 import sage.app.BaseGame;
 import sage.camera.ICamera;
 import sage.display.IDisplaySystem;
-import sage.event.EventManager;
-import sage.event.IEventListener;
-import sage.event.IEventManager;
+import sage.event.*;
 import sage.input.IInputManager;
 import sage.input.action.IAction;
 import sage.scene.SceneNode;
+import sage.scene.shape.Cube;
 import sage.scene.shape.Line;
 import sage.scene.shape.Rectangle;
 import utilities.Util;
@@ -35,15 +35,17 @@ import utilities.Util;
 public class TreasureHunter extends BaseGame{
 	 IDisplaySystem display;
 	 ICamera camera;
-	 IEventManager eventManager;
-	 
+	 IEventManager evManager;
+	 int treasures = 0;
 	 Util util = new Util();
 	 
 	 protected void initGame()
 	 { 	
+		 evManager = EventManager.getInstance();
+		 
 		 initGameObjects();
 		 IInputManager im = getInputManager();
-		 eventManager = EventManager.getInstance();
+		 
 //		 String gpName = im.getFirstGamepadName();
 		 String kbName = im.getKeyboardName();
 		 
@@ -108,20 +110,6 @@ public class TreasureHunter extends BaseGame{
 		 //im.associateAction(gpName, net.java.games.input.Component.Identifier.Button._4, setSpeed, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 	 }
 	 
-	 public void update(float elapsedTime){
-		 
-		 for(SceneNode s: getGameWorld()){
-			 if(s instanceof Rectangle){
-				 Rectangle rect = (Rectangle) s;
-				 if(rect.getWorldBound().contains(camera.getLocation())){
-					 CollectEvent collect = new CollectEvent();
-					 eventManager.triggerEvent(collect);
-				 }
-			 }
-		 }
-		 
-		 super.update(elapsedTime);
-	 }
 	 
 	 private void initGameObjects()
 	 { 
@@ -133,20 +121,20 @@ public class TreasureHunter extends BaseGame{
 		  camera.setLocation(new Point3D(1, 1, 20));
 		  
 //		  // add pyramid
-		  Pyramid aPyr = new Pyramid();
-		  Matrix3D pyrM = aPyr.getLocalTranslation();
-		  pyrM.translate(0,5,0);
-		  aPyr.setLocalTranslation(pyrM);
-		  addGameWorldObject(aPyr);
+//		  Pyramid aPyr = new Pyramid();
+//		  Matrix3D pyrM = aPyr.getLocalTranslation();
+//		  pyrM.translate(0,5,0);
+//		  aPyr.setLocalTranslation(pyrM);
+//		  addGameWorldObject(aPyr);
 		  
-//		  // add cube
-//		  Cube cube = new Cube();
-//		  Matrix3D cubeMatrix = cube.getLocalTranslation();
-//		  int cubeSize = 10;
-//		  cube.scale(cubeSize, cubeSize, cubeSize);
-//		  cubeMatrix.translate(0,cubeSize,0);
-//		  cube.setLocalTranslation(cubeMatrix);
-//		  addGameWorldObject(cube);
+//		  // add chest
+		  TreasureChest chest = new TreasureChest();
+		  Matrix3D chestMatrix = chest.getLocalTranslation();
+		  int chestSize = 1;
+		  chest.scale(chestSize, chestSize, chestSize);
+		  chestMatrix.translate(0,chestSize,0);
+		  chest.setLocalTranslation(chestMatrix);
+		  addGameWorldObject(chest);
 		  
 		  // add XZ plane
 		  float planeSize = 100.0f;
@@ -157,17 +145,19 @@ public class TreasureHunter extends BaseGame{
 		  
 		  // add coins
 		  int numberOfCoins = util.randomInteger(10, 20);
-		  for(int i = 0; i < numberOfCoins; i++){
-//			  Rectangle rect = new Rectangle(0.5f, 0.5f);
-//			  rect.setColor(util.randomColor());
-//			  Matrix3D rectangleMatrix = rect.getLocalTranslation();
-//			  rectangleMatrix.translate(util.randomInteger(-30, 30),1,util.randomInteger(-30, 30));
-//			  rect.setLocalTranslation(rectangleMatrix);
-		  		
+		  for(int i = 0; i < numberOfCoins; i++){		  		
 			  Coin coin = new Coin();
+			  Matrix3D coinMatrix = coin.getLocalTranslation();
+			  float coinSize = 0.1f;
+			  int spread = 10;
+			  coin.scale(coinSize, coinSize, coinSize);
+			  coinMatrix.translate(util.randomInteger(-spread, spread),1,util.randomInteger(-spread, spread));
+			  coin.setLocalTranslation(coinMatrix);
 			  addGameWorldObject(coin);
-			  eventManager.addListener(coin, CollectEvent.class);
+			  coin.updateWorldBound();
 		  }
+		  
+		  evManager.addListener(chest, CollectEvent.class);
 		  
 		  
 		  // add teapot
@@ -188,6 +178,24 @@ public class TreasureHunter extends BaseGame{
 		  addGameWorldObject(xAxis); 
 		  addGameWorldObject(yAxis);
 		  addGameWorldObject(zAxis);
+	 }
+	 
+	 public void update(float elapsedTime){
+		 
+		 for(SceneNode s: getGameWorld()){
+			 if(s instanceof Coin){
+				 Coin coin = (Coin) s;
+				 if(coin.getWorldBound().contains(camera.getLocation())){
+					 treasures++;
+					 CollectEvent collect = new CollectEvent(treasures);
+					 evManager.triggerEvent(collect);
+					 removeGameWorldObject(coin);
+					 break;
+				 }
+			 }
+		 }
+		 
+		 super.update(elapsedTime);
 	 }
 	  
 	 public static void main(String[] args)
