@@ -66,14 +66,16 @@ public class TreasureChest extends TriMesh implements IEventListener{
 	@Override
 	public boolean handleEvent(IGameEvent event) {
 		
-		double scaleAmount = 1.2;
+		double scaleAmount = 1.1;
 		
 		Matrix3D chestMatrix = this.getLocalScale();
-		chestMatrix.scale(scaleAmount, scaleAmount, scaleAmount);
-		this.setLocalScale(chestMatrix);
+		Matrix3D transMatrix = this.getLocalTranslation();
 		
-		CollectEvent collectEvent = (CollectEvent) event;
-		System.out.println(collectEvent.getCollisionMessage());
+		chestMatrix.scale(scaleAmount, scaleAmount, scaleAmount);
+		transMatrix.translate(0, 0.1, 0);
+		this.setLocalScale(chestMatrix);
+		this.setLocalTranslation(transMatrix);
+
 		return true;
 	}
 }

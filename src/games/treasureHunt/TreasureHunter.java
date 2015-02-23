@@ -13,6 +13,7 @@ import gameEngine.input.action.TurnUpAction;
 import games.treasureHunt.events.CollectEvent;
 import games.treasureHunt.objects.Coin;
 import games.treasureHunt.objects.Pyramid;
+import games.treasureHunt.objects.ScoreHUD;
 import games.treasureHunt.objects.TreasureChest;
 import graphicslib3D.Matrix3D;
 import graphicslib3D.Point3D;
@@ -36,8 +37,9 @@ public class TreasureHunter extends BaseGame{
 	 IDisplaySystem display;
 	 ICamera camera;
 	 IEventManager evManager;
-	 int treasures = 0;
+	 ScoreHUD scoreHUD;
 	 Util util = new Util();
+	 int treasures = 0;
 	 
 	 protected void initGame()
 	 { 	
@@ -60,7 +62,7 @@ public class TreasureHunter extends BaseGame{
 		 IAction flyUp = new FlyUpAction(camera);
 		 IAction flyDown = new FlyDownAction(camera);
 		 IAction forceQuit = new ForceQuit(this);
-		 
+		 		 
 		 im.associateAction (
 				 kbName, net.java.games.input.Component.Identifier.Key.W,
 				 moveForward, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -155,17 +157,15 @@ public class TreasureHunter extends BaseGame{
 			  coin.setLocalTranslation(coinMatrix);
 			  addGameWorldObject(coin);
 			  coin.updateWorldBound();
-		  }
+		  }		  
 		  
+		  // add HUD
+		  scoreHUD = new ScoreHUD();
+		  addGameWorldObject(scoreHUD);
+		  
+		  // attach event listeners
 		  evManager.addListener(chest, CollectEvent.class);
-		  
-		  
-		  // add teapot
-//		  Teapot teap = new Teapot(Color.blue);
-//		  Matrix3D teaM = teap.getLocalTranslation();
-//		  teaM.translate(-1,1,-5);
-//		  teap.setLocalTranslation(teaM);
-//		  addGameWorldObject(teap);
+		  evManager.addListener(scoreHUD, CollectEvent.class);
 		  
 		  // add axes
 		  Point3D origin = new Point3D(0,0,0);
@@ -194,6 +194,8 @@ public class TreasureHunter extends BaseGame{
 				 }
 			 }
 		 }
+		 
+		 scoreHUD.updateTime(elapsedTime);
 		 
 		 super.update(elapsedTime);
 	 }

@@ -10,8 +10,8 @@ public class CollectEvent extends AbstractGameEvent{
 		this.treasureCount = treasureCount;
 	}
 	
-	public String getCollisionMessage(){
-		return treasureCount + "";
+	public int getTreasureCount(){
+		return treasureCount;
 	}
 	
 }
