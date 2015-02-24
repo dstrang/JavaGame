@@ -9,6 +9,7 @@ import gameEngine.input.action.MoveLeftAction;
 import gameEngine.input.action.MoveRightAction;
 import gameEngine.input.action.MoveXAxis;
 import gameEngine.input.action.MoveYAxis;
+import gameEngine.input.action.MoveZAxis;
 import gameEngine.input.action.TurnDownAction;
 import gameEngine.input.action.TurnLeftAction;
 import gameEngine.input.action.TurnPitch;
@@ -19,7 +20,6 @@ import games.treasureHunt.events.CollectEvent;
 import games.treasureHunt.interfaces.ICollectible;
 import games.treasureHunt.objects.Ball;
 import games.treasureHunt.objects.Coin;
-import games.treasureHunt.objects.Pyramid;
 import games.treasureHunt.objects.ScoreHUD;
 import games.treasureHunt.objects.TreasureChest;
 import graphicslib3D.Matrix3D;
@@ -28,7 +28,6 @@ import graphicslib3D.Vector3D;
 
 import java.awt.Color;
 
-import net.java.games.input.Controller;
 import sage.app.BaseGame;
 import sage.camera.ICamera;
 import sage.display.IDisplaySystem;
@@ -36,10 +35,8 @@ import sage.event.*;
 import sage.input.IInputManager;
 import sage.input.action.IAction;
 import sage.scene.SceneNode;
-import sage.scene.shape.Cube;
 import sage.scene.shape.Line;
 import sage.scene.shape.Rectangle;
-import sage.scene.shape.Sphere;
 import utilities.Util;
 
 public class TreasureHunter extends BaseGame {
@@ -56,12 +53,8 @@ public class TreasureHunter extends BaseGame {
 		initGameObjects();
 		IInputManager im = getInputManager();
 
-		Controller gpName = im.getControllerByName("MotioninJoy Virtual Game Controller");
-		// String gpName = im.getFirstGamepadName();
+		String gpName = im.getFirstGamepadName();
 		String kbName = im.getKeyboardName();
-
-		System.out.println(gpName);
-		System.out.println(kbName);
 
 		IAction moveForward = new MoveForwardAction(camera);
 		IAction moveBackward = new MoveBackwardAction(camera);
@@ -76,9 +69,11 @@ public class TreasureHunter extends BaseGame {
 		IAction forceQuit = new ForceQuit(this);
 		IAction moveYAxis = new MoveYAxis(camera);
 		IAction moveXAxis = new MoveXAxis(camera);
+		IAction moveZAxis = new MoveZAxis(camera);
 		IAction turnPitch = new TurnPitch(camera);
 		IAction turnYaw = new TurnYaw(camera);
 
+		// keyboard actions
 		im.associateAction(kbName,
 				net.java.games.input.Component.Identifier.Key.W, moveForward,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -123,25 +118,32 @@ public class TreasureHunter extends BaseGame {
 				net.java.games.input.Component.Identifier.Key.ESCAPE,
 				forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(gpName,
-				net.java.games.input.Component.Identifier.Axis.Y, moveYAxis,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(gpName,
-				net.java.games.input.Component.Identifier.Axis.X, moveXAxis,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(gpName,
-				net.java.games.input.Component.Identifier.Axis.RZ, turnPitch,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(gpName,
-				net.java.games.input.Component.Identifier.Axis.Z, turnYaw,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(gpName,
-				net.java.games.input.Component.Identifier.Button._7, forceQuit,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		if(gpName != null){
+			// gamepad actions
+			im.associateAction(gpName,
+					net.java.games.input.Component.Identifier.Axis.Y, moveYAxis,
+					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+	
+			im.associateAction(gpName,
+					net.java.games.input.Component.Identifier.Axis.X, moveXAxis,
+					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+			
+			im.associateAction(gpName,
+					net.java.games.input.Component.Identifier.Axis.Z, moveZAxis,
+					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+	
+			im.associateAction(gpName,
+					net.java.games.input.Component.Identifier.Axis.RY, turnPitch,
+					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+	
+			im.associateAction(gpName,
+					net.java.games.input.Component.Identifier.Axis.RX, turnYaw,
+					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);		
+	
+			im.associateAction(gpName,
+					net.java.games.input.Component.Identifier.Button._7, forceQuit,
+					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		}
 
 		super.update(0.0f);
 	}

@@ -18,9 +18,10 @@ public class MoveRightAction extends AbstractInputAction{
  
 	public void performAction(float time, Event e)
 	{ 	
-		Vector3D viewDir = camera.getRightAxis().normalize();
+		Vector3D rightAxis = camera.getRightAxis().normalize();
 		Vector3D curLocVector = new Vector3D(camera.getLocation());
-		Vector3D newLocVec = curLocVector.add(viewDir.mult(speed));
+		Vector3D newLocVec = curLocVector.add(rightAxis.mult(speed));
+		
 		double newX = newLocVec.getX();
 		double newY = newLocVec.getY();
 		double newZ = newLocVec.getZ();

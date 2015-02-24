@@ -21,6 +21,7 @@ public class MoveForwardAction extends AbstractInputAction{
 		Vector3D viewDir = camera.getViewDirection().normalize();
 		Vector3D curLocVector = new Vector3D(camera.getLocation());
 		Vector3D newLocVec = curLocVector.add(viewDir.mult(speed));
+		
 		double newX = newLocVec.getX();
 		double newY = newLocVec.getY();
 		double newZ = newLocVec.getZ();

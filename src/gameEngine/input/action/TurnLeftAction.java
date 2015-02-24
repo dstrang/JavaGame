@@ -19,8 +19,9 @@ public class TurnLeftAction extends AbstractInputAction{
 	public void performAction(float time, Event e)
 	{ 	
 		 Matrix3D rotationAmt = new Matrix3D();
-		 Vector3D viewDirection = camera.getViewDirection();
+		 
 		 Vector3D upAxis = camera.getUpAxis();
+		 Vector3D viewDirection = camera.getViewDirection();
 		 Vector3D rightAxis = camera.getRightAxis();
 
 		 rotationAmt.rotate(speed,upAxis);
@@ -28,7 +29,7 @@ public class TurnLeftAction extends AbstractInputAction{
 		 viewDirection = viewDirection.mult(rotationAmt);
 		 rightAxis = rightAxis.mult(rotationAmt);
 		 
-		 camera.setRightAxis(rightAxis.normalize());
 		 camera.setViewDirection(viewDirection.normalize());
+		 camera.setRightAxis(rightAxis.normalize());
 	}
 }
