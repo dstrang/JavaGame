@@ -6,12 +6,12 @@ import net.java.games.input.Event;
 import sage.camera.ICamera;
 import sage.input.action.AbstractInputAction;
 
-public class TurnRightAction extends AbstractInputAction{
+public class TurnYaw extends AbstractInputAction{
 	
 	private ICamera camera;
-	private double speed = -0.2;
+	private double speed = 0.2;
 	
-	public TurnRightAction(ICamera c)
+	public TurnYaw(ICamera c)
 	{ 
 		camera = c;
 	}
@@ -23,12 +23,18 @@ public class TurnRightAction extends AbstractInputAction{
 		 Vector3D upAxis = camera.getUpAxis();
 		 Vector3D rightAxis = camera.getRightAxis();
 
-		 rotationAmt.rotate(speed,upAxis);
+		 if (e.getValue() < -0.2) {
+				rotationAmt.rotate(speed, upAxis);
+			} else if (e.getValue() > 0.2) {
+				rotationAmt.rotate(speed * -1, upAxis);
+			} else {
+				rotationAmt.rotate(0, upAxis);
+			}
 		 
 		 viewDirection = viewDirection.mult(rotationAmt);
 		 rightAxis = rightAxis.mult(rotationAmt);
 		 
 		 camera.setRightAxis(rightAxis.normalize());
-		 camera.setViewDirection(viewDirection.normalize());;
+		 camera.setViewDirection(viewDirection.normalize());
 	}
 }

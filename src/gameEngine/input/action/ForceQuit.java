@@ -1,4 +1,4 @@
-package games.treasureHunt;
+package gameEngine.input.action;
 
 import net.java.games.input.Event;
 import sage.app.AbstractGame;

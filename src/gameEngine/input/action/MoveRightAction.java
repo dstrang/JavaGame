@@ -9,6 +9,7 @@ import samples.SetSpeedAction;
 
 public class MoveRightAction extends AbstractInputAction{
 	private ICamera camera;
+	private double speed = 0.01;
 	
 	public MoveRightAction(ICamera c)
 	{ 
@@ -17,10 +18,9 @@ public class MoveRightAction extends AbstractInputAction{
  
 	public void performAction(float time, Event e)
 	{ 	
-		float moveAmount = (float) 0.01; 
 		Vector3D viewDir = camera.getRightAxis().normalize();
 		Vector3D curLocVector = new Vector3D(camera.getLocation());
-		Vector3D newLocVec = curLocVector.add(viewDir.mult(moveAmount));
+		Vector3D newLocVec = curLocVector.add(viewDir.mult(speed));
 		double newX = newLocVec.getX();
 		double newY = newLocVec.getY();
 		double newZ = newLocVec.getZ();

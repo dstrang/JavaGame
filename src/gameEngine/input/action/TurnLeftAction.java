@@ -7,7 +7,9 @@ import sage.camera.ICamera;
 import sage.input.action.AbstractInputAction;
 
 public class TurnLeftAction extends AbstractInputAction{
+	
 	private ICamera camera;
+	private double speed = 0.2;
 	
 	public TurnLeftAction(ICamera c)
 	{ 
@@ -21,7 +23,7 @@ public class TurnLeftAction extends AbstractInputAction{
 		 Vector3D upAxis = camera.getUpAxis();
 		 Vector3D rightAxis = camera.getRightAxis();
 
-		 rotationAmt.rotate(0.1,upAxis);
+		 rotationAmt.rotate(speed,upAxis);
 		 
 		 viewDirection = viewDirection.mult(rotationAmt);
 		 rightAxis = rightAxis.mult(rotationAmt);

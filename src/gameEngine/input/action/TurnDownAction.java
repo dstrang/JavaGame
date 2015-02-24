@@ -8,6 +8,7 @@ import sage.input.action.AbstractInputAction;
 
 public class TurnDownAction extends AbstractInputAction{
 	private ICamera camera;
+	private double speed = -0.2;
 	
 	public TurnDownAction(ICamera c)
 	{ 
@@ -21,7 +22,7 @@ public class TurnDownAction extends AbstractInputAction{
 		 Vector3D upAxis = camera.getUpAxis();
 		 Vector3D rightAxis = camera.getRightAxis();
 
-		 rotationAmt.rotate(-0.1,rightAxis);
+		 rotationAmt.rotate(speed,rightAxis);
 		 
 		 viewDirection = viewDirection.mult(rotationAmt);
 		 upAxis = upAxis.mult(rotationAmt);

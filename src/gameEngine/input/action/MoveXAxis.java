@@ -7,20 +7,29 @@ import sage.camera.ICamera;
 import sage.input.action.AbstractInputAction;
 import samples.SetSpeedAction;
 
-public class MoveBackwardAction extends AbstractInputAction{
+public class MoveXAxis extends AbstractInputAction{
 	private ICamera camera;
-	private double speed = -0.015;
+	private double speed = -0.01;
 	
-	public MoveBackwardAction(ICamera c)
+	public MoveXAxis(ICamera c)
 	{ 
 		camera = c;
 	}
  
 	public void performAction(float time, Event e)
 	{ 	
-		Vector3D viewDir = camera.getViewDirection().normalize();
+		Vector3D viewDir = camera.getRightAxis().normalize();
 		Vector3D curLocVector = new Vector3D(camera.getLocation());
-		Vector3D newLocVec = curLocVector.add(viewDir.mult(speed));
+		Vector3D newLocVec = new Vector3D();
+		
+		if(e.getValue() < -0.2){
+			newLocVec = curLocVector.add(viewDir.mult(speed));
+		}else if(e.getValue() > 0.2){
+			newLocVec = curLocVector.minus(viewDir.mult(speed));
+		}else{
+			newLocVec = curLocVector;
+		}
+		
 		double newX = newLocVec.getX();
 		double newY = newLocVec.getY();
 		double newZ = newLocVec.getZ();

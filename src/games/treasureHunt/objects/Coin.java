@@ -1,5 +1,6 @@
 package games.treasureHunt.objects;
 
+import games.treasureHunt.interfaces.ICollectible;
 import graphicslib3D.Matrix3D;
 import graphicslib3D.Vector3D;
 
@@ -8,8 +9,10 @@ import java.nio.IntBuffer;
 
 import sage.renderer.IRenderer;
 import sage.scene.TriMesh;
+import sage.scene.bounding.BoundingVolume;
+import sage.scene.shape.Rectangle;
 
-public class Coin extends TriMesh {
+public class Coin extends TriMesh implements ICollectible{
 
 	private static float width = 1.0f;
 	private static float height = 3.0f;
@@ -55,11 +58,13 @@ public class Coin extends TriMesh {
 
 	public void draw(IRenderer r){
 		this.rotate(0.1f, new Vector3D(0,1,0));
-		
-//		Matrix3D local = this.getLocalTranslation();
-//		local.translate(0, 0.01, 0);
-		
 		super.draw(r);
+	}
+
+	@Override
+	public BoundingVolume worldBound() {
+		
+		return this.getWorldBound();
 	}
 	
 }
