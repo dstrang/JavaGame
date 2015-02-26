@@ -28,6 +28,7 @@ import graphicslib3D.Vector3D;
 
 import java.awt.Color;
 
+import net.java.games.input.Component.Identifier;
 import sage.app.BaseGame;
 import sage.camera.ICamera;
 import sage.display.IDisplaySystem;
@@ -75,73 +76,73 @@ public class TreasureHunter extends BaseGame {
 
 		// keyboard actions
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.W, moveForward,
+				Identifier.Key.W, moveForward,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.S, moveBackward,
+				Identifier.Key.S, moveBackward,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.A, moveLeft,
+				Identifier.Key.A, moveLeft,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.D, moveRight,
+				Identifier.Key.D, moveRight,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.UP, turnUp,
+				Identifier.Key.UP, turnUp,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.DOWN, turnDown,
+				Identifier.Key.DOWN, turnDown,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.LEFT, turnLeft,
+				Identifier.Key.LEFT, turnLeft,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.RIGHT, turnRight,
+				Identifier.Key.RIGHT, turnRight,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.SPACE, flyUp,
+				Identifier.Key.SPACE, flyUp,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.LSHIFT, flyDown,
+				Identifier.Key.LSHIFT, flyDown,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		im.associateAction(kbName,
-				net.java.games.input.Component.Identifier.Key.ESCAPE,
+				Identifier.Key.ESCAPE,
 				forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		if(gpName != null){
 			// gamepad actions
 			im.associateAction(gpName,
-					net.java.games.input.Component.Identifier.Axis.Y, moveYAxis,
+					Identifier.Axis.Y, moveYAxis,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 	
 			im.associateAction(gpName,
-					net.java.games.input.Component.Identifier.Axis.X, moveXAxis,
+					Identifier.Axis.X, moveXAxis,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 			
 			im.associateAction(gpName,
-					net.java.games.input.Component.Identifier.Axis.Z, moveZAxis,
+					Identifier.Axis.Z, moveZAxis,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 	
 			im.associateAction(gpName,
-					net.java.games.input.Component.Identifier.Axis.RY, turnPitch,
+					Identifier.Axis.RY, turnPitch,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 	
 			im.associateAction(gpName,
-					net.java.games.input.Component.Identifier.Axis.RX, turnYaw,
+					Identifier.Axis.RX, turnYaw,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);		
 	
 			im.associateAction(gpName,
-					net.java.games.input.Component.Identifier.Button._7, forceQuit,
+					Identifier.Button._7, forceQuit,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		}
 

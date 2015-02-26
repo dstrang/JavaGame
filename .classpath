@@ -11,16 +11,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/javagaming/graphicslib3D/graphicslib3D.jar"/>
-	<classpathentry kind="lib" path="C:/javagaming/jbullet/jbullet.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/jinput/jinput.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/jogl/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/jogl/jogl-all.jar"/>
-	<classpathentry kind="lib" path="C:/javagaming/luaj/luaj-jme-3.0.jar"/>
-	<classpathentry kind="lib" path="C:/javagaming/luaj/luaj-jse-3.0.jar"/>
-	<classpathentry kind="lib" path="C:/javagaming/luaj/luaj-sources-3.0.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/ode4j/core-0.3.0.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/vecmath/vecmath.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/sage/sage.jar"/>
-	<classpathentry kind="lib" path="C:/javagaming/jogl/joal.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
