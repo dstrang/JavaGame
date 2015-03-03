@@ -1,14 +1,11 @@
-package games.treasureHunt;
+package games.treasureHunt2;
 
-import gameEngine.input.action.FlyDownAction;
-import gameEngine.input.action.MoveY;
 import gameEngine.input.action.ForceQuit;
-import gameEngine.input.action.MoveBackwardAction;
-import gameEngine.input.action.MoveZ;
 import gameEngine.input.action.MoveX;
-import gameEngine.input.action.MoveRightAction;
 import gameEngine.input.action.MoveXAxis;
+import gameEngine.input.action.MoveY;
 import gameEngine.input.action.MoveYAxis;
+import gameEngine.input.action.MoveZ;
 import gameEngine.input.action.MoveZAxis;
 import gameEngine.input.action.TurnDownAction;
 import gameEngine.input.action.TurnLeftAction;
@@ -32,7 +29,8 @@ import net.java.games.input.Component.Identifier;
 import sage.app.BaseGame;
 import sage.camera.ICamera;
 import sage.display.IDisplaySystem;
-import sage.event.*;
+import sage.event.EventManager;
+import sage.event.IEventManager;
 import sage.input.IInputManager;
 import sage.input.action.IAction;
 import sage.scene.SceneNode;
@@ -57,16 +55,13 @@ public class TreasureHunter extends BaseGame {
 		String gpName = im.getFirstGamepadName();
 		String kbName = im.getKeyboardName();
 
-		IAction moveForward = new MoveZ(camera);
-		IAction moveBackward = new MoveBackwardAction(camera);
-		IAction moveLeft = new MoveX(camera);
-		IAction moveRight = new MoveRightAction(camera);
+		IAction moveZ = new MoveZ(camera);
+		IAction moveX = new MoveX(camera);
+		IAction moveY = new MoveY(camera);
 		IAction turnUp = new TurnUpAction(camera);
 		IAction turnDown = new TurnDownAction(camera);
 		IAction turnLeft = new TurnLeftAction(camera);
 		IAction turnRight = new TurnRightAction(camera);
-		IAction flyUp = new MoveY(camera);
-		IAction flyDown = new FlyDownAction(camera);
 		IAction forceQuit = new ForceQuit(this);
 		IAction moveYAxis = new MoveYAxis(camera);
 		IAction moveXAxis = new MoveXAxis(camera);
@@ -75,74 +70,57 @@ public class TreasureHunter extends BaseGame {
 		IAction turnYaw = new TurnYaw(camera);
 
 		// keyboard actions
-		im.associateAction(kbName,
-				Identifier.Key.W, moveForward,
+		im.associateAction(kbName, Identifier.Key.W, moveZ,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.S, moveBackward,
+		im.associateAction(kbName, Identifier.Key.S, moveZ,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.A, moveLeft,
+		im.associateAction(kbName, Identifier.Key.A, moveX,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.D, moveRight,
+		im.associateAction(kbName, Identifier.Key.D, moveX,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.UP, turnUp,
+		im.associateAction(kbName, Identifier.Key.SPACE, moveY,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.DOWN, turnDown,
+		im.associateAction(kbName, Identifier.Key.LSHIFT, moveY,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.LEFT, turnLeft,
+		im.associateAction(kbName, Identifier.Key.UP, turnUp,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.RIGHT, turnRight,
+		im.associateAction(kbName, Identifier.Key.DOWN, turnDown,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.SPACE, flyUp,
+		im.associateAction(kbName, Identifier.Key.LEFT, turnLeft,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.LSHIFT, flyDown,
+		im.associateAction(kbName, Identifier.Key.RIGHT, turnRight,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		im.associateAction(kbName,
-				Identifier.Key.ESCAPE,
-				forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateAction(kbName, Identifier.Key.ESCAPE, forceQuit,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
-		if(gpName != null){
+		if (gpName != null) {
 			// gamepad actions
-			im.associateAction(gpName,
-					Identifier.Axis.Y, moveYAxis,
+			im.associateAction(gpName, Identifier.Axis.Y, moveYAxis,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-	
-			im.associateAction(gpName,
-					Identifier.Axis.X, moveXAxis,
+
+			im.associateAction(gpName, Identifier.Axis.X, moveXAxis,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-			
-			im.associateAction(gpName,
-					Identifier.Axis.Z, moveZAxis,
+
+			im.associateAction(gpName, Identifier.Axis.Z, moveZAxis,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-	
-			im.associateAction(gpName,
-					Identifier.Axis.RY, turnPitch,
+
+			im.associateAction(gpName, Identifier.Axis.RY, turnPitch,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-	
-			im.associateAction(gpName,
-					Identifier.Axis.RX, turnYaw,
-					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);		
-	
-			im.associateAction(gpName,
-					Identifier.Button._7, forceQuit,
+
+			im.associateAction(gpName, Identifier.Axis.RX, turnYaw,
+					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+			im.associateAction(gpName, Identifier.Button._7, forceQuit,
 					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		}
 
