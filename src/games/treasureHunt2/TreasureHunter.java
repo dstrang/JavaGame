@@ -45,6 +45,42 @@ public class TreasureHunter extends BaseGame {
 	ScoreHUD scoreHUD;
 	Util util = new Util();
 	int treasures = 0;
+	
+	private IDisplaySystem createDisplaySystem(){
+		display = new FSDisplaySystem(700, 300, 24, 20, true, "sage.renderer.jogl.JOGLRenderer");
+		System.out.println("\nWaiting for display creation...");
+		
+		int count = 0;
+		
+		while(!display.isCreated()){
+			try{
+				Thread.sleep(10);
+			}catch (InterruptedException ex){
+				throw new RuntimeException("Display creation interrupted");
+			}
+			
+			count++;
+			System.out.print("+");
+			if(count % 80 == 0){
+				System.out.println();
+			}
+			
+			if(count > 2000){
+				throw new RuntimeException("Unable to create display");
+			}
+		}
+		
+		System.out.println();
+		return display;
+	}
+	
+//	protected void createDisplay(){
+//		createDisplaySystem();
+//	}
+//	
+//	protected void shutdown(){
+//		display.close();
+//	}
 
 	protected void initGame() {
 		evManager = EventManager.getInstance();
