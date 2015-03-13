@@ -184,7 +184,7 @@ public class FSDisplaySystem implements IDisplaySystem{
 
 	@Override
 	public void setTitle(String title) {
-		this.setTitle(title);
+		this.frame.setTitle(title);
 	}
 
 	@Override

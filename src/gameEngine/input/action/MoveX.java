@@ -1,37 +1,37 @@
 package gameEngine.input.action;
 
+import graphicslib3D.Matrix3D;
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
 import net.java.games.input.Event;
 import sage.camera.ICamera;
 import sage.input.action.AbstractInputAction;
+import sage.scene.SceneNode;
 
 public class MoveX extends AbstractInputAction {
-	private ICamera camera;
+	private SceneNode player;
 	private double speed = -0.01;
 
-	public MoveX(ICamera c) {
-		camera = c;
+	public MoveX(SceneNode player) {
+		this.player = player;
 	}
 
 	public void performAction(float time, Event e) {
-		Vector3D rightAxis = camera.getRightAxis().normalize();
-		Vector3D curLocVector = new Vector3D(camera.getLocation());
-		Vector3D newLocVec = null;
-
+		Matrix3D playerMatrix = player.getLocalTranslation();
+		Vector3D direction = new Vector3D(1,0,0);
+		direction = direction.mult(playerMatrix);
+		
 		switch (e.getComponent().toString()) {
 		case "A":
-			newLocVec = curLocVector.add(rightAxis.mult(speed));
+		case "J":
+			direction.scale((speed * time) * -1);
 			break;
 		case "D":
-			newLocVec = curLocVector.add(rightAxis.mult(speed * -1));
+		case "L":
+			direction.scale(speed * time);
 			break;
 		}
-
-		double newX = newLocVec.getX();
-		double newY = newLocVec.getY();
-		double newZ = newLocVec.getZ();
-		Point3D newLoc = new Point3D(newX, newY, newZ);
-		camera.setLocation(newLoc);
+		
+		player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
 	}
 }

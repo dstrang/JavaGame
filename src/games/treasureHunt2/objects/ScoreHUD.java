@@ -3,6 +3,7 @@ package games.treasureHunt2.objects;
 import games.treasureHunt.events.CollectEvent;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.text.DecimalFormat;
 
 import sage.app.AbstractGame;
@@ -21,12 +22,14 @@ public class ScoreHUD extends HUDObject implements IEventListener{
 	private float time = 0;
 	private int score = 0;
 	private AbstractGame game;
+	private Point location;
 	
-	public ScoreHUD(){
+	public ScoreHUD(Point location){
+		this.location = location;
 		timeString = new HUDString(timeLabel + time);
 		scoreString = new HUDString(scoreLabel + score);
-		timeString.setLocation(0.02, 0.95);
-		scoreString.setLocation(0.02, 0.92);
+		timeString.setLocation(location.x, location.y);
+		scoreString.setLocation(location.x, location.y);
 		timeString.setColor(Color.WHITE);
 		scoreString.setColor(Color.WHITE);
 	}

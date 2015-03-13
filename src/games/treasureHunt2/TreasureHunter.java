@@ -19,6 +19,7 @@ import games.treasureHunt.objects.Ball;
 import games.treasureHunt.objects.Coin;
 import games.treasureHunt.objects.ScoreHUD;
 import games.treasureHunt.objects.TreasureChest;
+import games.treasureHunt2.cameras.OrbitCameraController;
 import graphicslib3D.Matrix3D;
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
@@ -28,148 +29,134 @@ import java.awt.Color;
 import net.java.games.input.Component.Identifier;
 import sage.app.BaseGame;
 import sage.camera.ICamera;
+import sage.camera.JOGLCamera;
 import sage.display.IDisplaySystem;
 import sage.event.EventManager;
 import sage.event.IEventManager;
 import sage.input.IInputManager;
+import sage.input.ThirdPersonCameraController;
 import sage.input.action.IAction;
+import sage.renderer.IRenderer;
+import sage.scene.HUDString;
 import sage.scene.SceneNode;
+import sage.scene.shape.Cube;
 import sage.scene.shape.Line;
+import sage.scene.shape.Pyramid;
 import sage.scene.shape.Rectangle;
 import utilities.Util;
 
 public class TreasureHunter extends BaseGame {
-	IDisplaySystem display;
-	ICamera camera;
-	IEventManager evManager;
-	ScoreHUD scoreHUD;
-	Util util = new Util();
-	int treasures = 0;
+	private IDisplaySystem display;
+	private ICamera camera1, camera2;
+	private OrbitCameraController cameraController;
+	private IRenderer renderer;
+	private IEventManager evManager;
+	private IInputManager im;
+	private SceneNode player1, player2;
+	private ScoreHUD scoreHUD1, scoreHUD2;
+	private OrbitCameraController cam1Controller;
+	private OrbitCameraController cam2Controller;
+	private Util util = new Util();
+	private int treasures = 0;
+
+	protected void initGame() {
+		display.setTitle("Treasure Hunter");
+		renderer = display.getRenderer();
+		im = getInputManager();
+		createScene();
+		createPlayers();
+		initInput();
+	}
 	
-	private IDisplaySystem createDisplaySystem(){
-		display = new FSDisplaySystem(700, 300, 24, 20, true, "sage.renderer.jogl.JOGLRenderer");
+	protected void createDisplay() {
+		display = new FSDisplaySystem(1920, 1080, 24, 20, false,
+				"sage.renderer.jogl.JOGLRenderer");
 		System.out.println("\nWaiting for display creation...");
-		
+
 		int count = 0;
-		
-		while(!display.isCreated()){
-			try{
+
+		while (!display.isCreated()) {
+			try {
 				Thread.sleep(10);
-			}catch (InterruptedException ex){
+			} catch (InterruptedException ex) {
 				throw new RuntimeException("Display creation interrupted");
 			}
-			
+
 			count++;
 			System.out.print("+");
-			if(count % 80 == 0){
+			if (count % 80 == 0) {
 				System.out.println();
 			}
-			
-			if(count > 2000){
+
+			if (count > 2000) {
 				throw new RuntimeException("Unable to create display");
 			}
 		}
-		
+
 		System.out.println();
-		return display;
+	}
+
+	protected void shutdown() {
+		display.close();
 	}
 	
-//	protected void createDisplay(){
-//		createDisplaySystem();
-//	}
-//	
-//	protected void shutdown(){
-//		display.close();
-//	}
-
-	protected void initGame() {
-		evManager = EventManager.getInstance();
-
-		initGameObjects();
-		IInputManager im = getInputManager();
-
-		String gpName = im.getFirstGamepadName();
-		String kbName = im.getKeyboardName();
-
-		IAction moveZ = new MoveZ(camera);
-		IAction moveX = new MoveX(camera);
-		IAction moveY = new MoveY(camera);
-		IAction turnUp = new TurnUpAction(camera);
-		IAction turnDown = new TurnDownAction(camera);
-		IAction turnLeft = new TurnLeftAction(camera);
-		IAction turnRight = new TurnRightAction(camera);
-		IAction forceQuit = new ForceQuit(this);
-		IAction moveYAxis = new MoveYAxis(camera);
-		IAction moveXAxis = new MoveXAxis(camera);
-		IAction moveZAxis = new MoveZAxis(camera);
-		IAction turnPitch = new TurnPitch(camera);
-		IAction turnYaw = new TurnYaw(camera);
-
-		// keyboard actions
-		im.associateAction(kbName, Identifier.Key.W, moveZ,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.S, moveZ,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.A, moveX,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.D, moveX,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.SPACE, moveY,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.LSHIFT, moveY,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.UP, turnUp,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.DOWN, turnDown,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.LEFT, turnLeft,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.RIGHT, turnRight,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		im.associateAction(kbName, Identifier.Key.ESCAPE, forceQuit,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		if (gpName != null) {
-			// gamepad actions
-			im.associateAction(gpName, Identifier.Axis.Y, moveYAxis,
-					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-			im.associateAction(gpName, Identifier.Axis.X, moveXAxis,
-					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-			im.associateAction(gpName, Identifier.Axis.Z, moveZAxis,
-					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-			im.associateAction(gpName, Identifier.Axis.RY, turnPitch,
-					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-			im.associateAction(gpName, Identifier.Axis.RX, turnYaw,
-					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-			im.associateAction(gpName, Identifier.Button._7, forceQuit,
-					IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		}
-
-		super.update(0.0f);
+	protected void render(){
+		renderer.setCamera(camera1);
+		super.render();
+		
+		renderer.setCamera(camera2);
+		super.render();
 	}
 
-	private void initGameObjects() {
-		IDisplaySystem display = getDisplaySystem();
-		display.setTitle("Treasure Hunter");
 
-		camera = display.getRenderer().getCamera();
-		camera.setPerspectiveFrustum(45, 1, 0.01, 1000);
-		camera.setLocation(new Point3D(1, 1, 20));
+
+	private void createPlayers() {
+		player1 = new Pyramid("PLAYER1");
+		player1.scale(0.5f, 0.5f, 0.5f);
+		player1.translate(0, 1, 50);
+		player1.rotate(180, new Vector3D(0, 1, 0));
+		addGameWorldObject(player1);
+		camera1 = new JOGLCamera(renderer);
+		camera1.setPerspectiveFrustum(60, 2, 1, 1000);
+		camera1.setViewport(0.0, 1.0, 0.0, 0.45);
+		
+		player2 = new Cube("PLAYER2");
+		player2.scale(0.5f, 0.5f, 0.5f);
+		player2.translate(50, 1, 0);
+		player2.rotate(-90, new Vector3D(0, 1, 0));
+		addGameWorldObject(player2);
+		camera2 = new JOGLCamera(renderer);
+		camera2.setPerspectiveFrustum(60, 2, 1, 1000);
+		camera2.setViewport(0.0, 1.0, 0.55, 1.0);
+		
+		createPlayerHUDs();
+	}
+
+	private void createPlayerHUDs() {
+		HUDString player1ID = new HUDString("Player1");
+		player1ID.setName("Player1ID");
+		player1ID.setLocation(0.01, 0.06);
+		player1ID.setRenderMode(sage.scene.SceneNode.RENDER_MODE.ORTHO);
+		player1ID.setColor(Color.red);
+		player1ID.setCullMode(sage.scene.SceneNode.CULL_MODE.NEVER);
+		camera1.addToHUD(player1ID);
+		HUDString player2ID = new HUDString("Player2");
+		player2ID.setName("Player2ID");
+		player2ID.setLocation(0.01, 0.06);
+		player2ID.setRenderMode(sage.scene.SceneNode.RENDER_MODE.ORTHO);
+		player2ID.setColor(Color.yellow);
+		player2ID.setCullMode(sage.scene.SceneNode.CULL_MODE.NEVER);
+		camera2.addToHUD(player2ID);
+
+	}
+
+	private void createScene() {
+		// add XZ plane
+		float planeSize = 100.0f;
+		Rectangle plane = new Rectangle(planeSize, planeSize);
+		plane.setColor(Color.GRAY);
+		plane.rotate(90, new Vector3D(1, 0, 0));
+		addGameWorldObject(plane);
 
 		// add chest
 		TreasureChest chest = new TreasureChest();
@@ -179,13 +166,6 @@ public class TreasureHunter extends BaseGame {
 		chestMatrix.translate(0, chestSize, 0);
 		chest.setLocalTranslation(chestMatrix);
 		addGameWorldObject(chest);
-
-		// add XZ plane
-		float planeSize = 100.0f;
-		Rectangle plane = new Rectangle(planeSize, planeSize);
-		plane.setColor(Color.GRAY);
-		plane.rotate(90, new Vector3D(1, 0, 0));
-		addGameWorldObject(plane);
 
 		// add coins
 		int numberOfCoins = util.randomInteger(10, 20);
@@ -216,14 +196,6 @@ public class TreasureHunter extends BaseGame {
 			ball.updateWorldBound();
 		}
 
-		// add HUD
-		scoreHUD = new ScoreHUD();
-		addGameWorldObject(scoreHUD);
-
-		// attach event listeners
-		evManager.addListener(chest, CollectEvent.class);
-		evManager.addListener(scoreHUD, CollectEvent.class);
-
 		// add axes
 		Point3D origin = new Point3D(0, 0, 0);
 		Point3D xEnd = new Point3D(100, 0, 0);
@@ -237,23 +209,81 @@ public class TreasureHunter extends BaseGame {
 		addGameWorldObject(zAxis);
 	}
 
+	private void initInput() {
+		String gamepad = im.getFirstGamepadName();
+		String keyboard = im.getKeyboardName();
+		String mouse = im.getMouseName();
+		
+		cam1Controller = new OrbitCameraController(camera1, player1, im, keyboard);
+		cam2Controller = new OrbitCameraController(camera2, player2, im, keyboard);
+
+		IAction player1MoveZ = new MoveZ(player1);
+		im.associateAction(keyboard, Identifier.Key.W, player1MoveZ,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateAction(keyboard, Identifier.Key.S, player1MoveZ,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		
+		IAction player1MoveX = new MoveX(player1);
+		im.associateAction(keyboard, Identifier.Key.A, player1MoveX,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateAction(keyboard, Identifier.Key.D, player1MoveX,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		
+//		IAction player1TurnLeft = new TurnLeftAction(camera1);
+//		im.associateAction(keyboard, Identifier.Key.Q, player1TurnLeft,
+//				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+//		
+//		IAction player1TurnRight = new TurnRightAction(camera1);
+//		im.associateAction(keyboard, Identifier.Key.E, player1TurnRight,
+//				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		
+		
+		IAction player2MoveZ = new MoveZ(player2);
+		im.associateAction(keyboard, Identifier.Key.I, player2MoveZ,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateAction(keyboard, Identifier.Key.K, player2MoveZ,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		
+		IAction player2MoveX = new MoveX(player2);
+		im.associateAction(keyboard, Identifier.Key.J, player2MoveX,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateAction(keyboard, Identifier.Key.L, player2MoveX,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		
+//		IAction player2TurnLeft = new TurnLeftAction(camera2);
+//		im.associateAction(keyboard, Identifier.Key.U, player2TurnLeft,
+//				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+//		
+//		IAction player2TurnRight = new TurnRightAction(camera2);
+//		im.associateAction(keyboard, Identifier.Key.O, player2TurnRight,
+//				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+		IAction forceQuit = new ForceQuit(this);
+		im.associateAction(keyboard, Identifier.Key.ESCAPE,
+				forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+
+		super.update(0.0f);
+	}
+
 	public void update(float elapsedTime) {
 
-		for (SceneNode s : getGameWorld()) {
-			if (s instanceof ICollectible) {
-				ICollectible collectible = (ICollectible) s;
-				if (collectible.worldBound().contains(camera.getLocation())) {
-					treasures++;
-					CollectEvent collect = new CollectEvent(treasures);
-					evManager.triggerEvent(collect);
-					removeGameWorldObject((SceneNode) collectible);
-					break;
-				}
-			}
-		}
+//		for (SceneNode s : getGameWorld()) {
+//			if (s instanceof ICollectible) {
+//				ICollectible collectible = (ICollectible) s;
+//				if (collectible.worldBound().contains(camera.getLocation())) {
+//					treasures++;
+//					CollectEvent collect = new CollectEvent(treasures);
+//					evManager.triggerEvent(collect);
+//					removeGameWorldObject((SceneNode) collectible);
+//					break;
+//				}
+//			}
+//		}
 
-		scoreHUD.updateTime(elapsedTime);
+//		scoreHUD.updateTime(elapsedTime);
 
+		cam1Controller.update(elapsedTime);
+		cam2Controller.update(elapsedTime);
 		super.update(elapsedTime);
 	}
 
