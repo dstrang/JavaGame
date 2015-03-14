@@ -10,25 +10,23 @@ import sage.scene.SceneNode;
 
 public class MoveX extends AbstractInputAction {
 	private SceneNode player;
-	private double speed = -0.01;
+	private double speed = 0.01;
 
 	public MoveX(SceneNode player) {
 		this.player = player;
 	}
 
 	public void performAction(float time, Event e) {
-		Matrix3D playerMatrix = player.getLocalTranslation();
+		Matrix3D playerMatrix = player.getLocalRotation();
 		Vector3D direction = new Vector3D(1,0,0);
 		direction = direction.mult(playerMatrix);
 		
 		switch (e.getComponent().toString()) {
 		case "A":
-		case "J":
-			direction.scale((speed * time) * -1);
+			direction.scale(speed * time);
 			break;
 		case "D":
-		case "L":
-			direction.scale(speed * time);
+			direction.scale(speed * time * -1);
 			break;
 		}
 		

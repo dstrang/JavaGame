@@ -26,10 +26,6 @@ public class Ball extends Sphere implements ICollectible{
 		super(radius, stacks, slices, color);
 	}
 
-	public void draw(IRenderer r){
-		this.rotate(-0.1f, new Vector3D(1,1,1));
-		super.draw(r);
-	}
 
 	@Override
 	public BoundingVolume worldBound() {

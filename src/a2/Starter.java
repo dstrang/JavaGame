@@ -1,6 +1,6 @@
-package a1;
+package a2;
 
-import games.treasureHunt.TreasureHunter;
+import games.treasureHunt2.TreasureHunter;
 
 public class Starter {
 	public static void main(String[] args) {

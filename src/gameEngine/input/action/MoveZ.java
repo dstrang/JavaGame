@@ -19,18 +19,16 @@ public class MoveZ extends AbstractInputAction{
  
 	public void performAction(float time, Event e)
 	{
-		Matrix3D playerMatrix = player.getLocalTranslation();
+		
+		Matrix3D playerMatrix = player.getLocalRotation();
 		Vector3D direction = new Vector3D(0,0,1);
 		direction = direction.mult(playerMatrix);
 		
-		
 		switch (e.getComponent().toString()) {
 		case "W":
-		case "I":
 			direction.scale(speed * time);
 			break;
 		case "S":
-		case "K":
 			direction.scale((speed * time) * -1);
 			break;
 		}

@@ -1,6 +1,6 @@
 package games.treasureHunt2.objects;
 
-import games.treasureHunt.events.CollectEvent;
+import games.treasureHunt2.events.CollectEvent;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -22,16 +22,22 @@ public class ScoreHUD extends HUDObject implements IEventListener{
 	private float time = 0;
 	private int score = 0;
 	private AbstractGame game;
-	private Point location;
+	private double locX;
+	private double locY;
 	
-	public ScoreHUD(Point location){
-		this.location = location;
+	public ScoreHUD(double x, double y){
+		locX = x;
+		locY = y;
 		timeString = new HUDString(timeLabel + time);
-		scoreString = new HUDString(scoreLabel + score);
-		timeString.setLocation(location.x, location.y);
-		scoreString.setLocation(location.x, location.y);
+		timeString.setLocation(locX, locY);
 		timeString.setColor(Color.WHITE);
+		timeString.setRenderMode(sage.scene.SceneNode.RENDER_MODE.ORTHO);
+		timeString.setCullMode(sage.scene.SceneNode.CULL_MODE.NEVER);
+		scoreString = new HUDString(scoreLabel + score);
+		scoreString.setLocation(locX, locY + 0.05);
 		scoreString.setColor(Color.WHITE);
+		scoreString.setRenderMode(sage.scene.SceneNode.RENDER_MODE.ORTHO);
+		scoreString.setCullMode(sage.scene.SceneNode.CULL_MODE.NEVER);
 	}
 
 	public void updateTime(float elapsedTime){
@@ -44,7 +50,6 @@ public class ScoreHUD extends HUDObject implements IEventListener{
 		this.score = score;
 		scoreString.setText(scoreLabel + score);
 	}
-	
 
 	@Override
 	public void draw(IRenderer r) {

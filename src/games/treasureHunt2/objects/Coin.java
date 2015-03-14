@@ -56,11 +56,6 @@ public class Coin extends TriMesh implements ICollectible{
 		this.setIndexBuffer(triangleBuf);
 	}
 
-	public void draw(IRenderer r){
-		this.rotate(0.1f, new Vector3D(0,1,0));
-		super.draw(r);
-	}
-
 	@Override
 	public BoundingVolume worldBound() {
 		
