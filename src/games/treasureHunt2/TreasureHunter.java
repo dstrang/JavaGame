@@ -248,11 +248,11 @@ public class TreasureHunter extends BaseGame {
 	}
 
 	private void initInput() {
-		String gamepad = im.getFirstGamepadName();
+//		String gamepad = im.getFirstGamepadName();
 		String keyboard = im.getKeyboardName();
 		
 		cam1Controller = new OrbitCameraController(camera1, 90, player1, im, keyboard);
-		cam2Controller = new OrbitCameraController(camera2, 360, player2, im, gamepad);
+//		cam2Controller = new OrbitCameraController(camera2, 360, player2, im, gamepad);
 
 		IAction player1MoveZ = new MoveZ(player1);
 		im.associateAction(keyboard, Identifier.Key.W, player1MoveZ,
@@ -266,13 +266,13 @@ public class TreasureHunter extends BaseGame {
 		im.associateAction(keyboard, Identifier.Key.D, player1MoveX,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		
-		IAction player2MoveZ = new MoveZAxis(player2);
-		im.associateAction(gamepad, Identifier.Axis.Y, player2MoveZ,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		
-		IAction player2MoveX = new MoveXAxis(player2);
-		im.associateAction(gamepad, Identifier.Axis.X, player2MoveX,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+//		IAction player2MoveZ = new MoveZAxis(player2);
+//		im.associateAction(gamepad, Identifier.Axis.Y, player2MoveZ,
+//				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+//		
+//		IAction player2MoveX = new MoveXAxis(player2);
+//		im.associateAction(gamepad, Identifier.Axis.X, player2MoveX,
+//				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		IAction forceQuit = new ForceQuit(this);
 		im.associateAction(keyboard, Identifier.Key.ESCAPE,
@@ -307,7 +307,7 @@ public class TreasureHunter extends BaseGame {
 		scoreHUD2.updateTime(elapsedTime);
 
 		cam1Controller.update(elapsedTime);
-		cam2Controller.update(elapsedTime);
+//		cam2Controller.update(elapsedTime);
 		super.update(elapsedTime);
 	}
 
