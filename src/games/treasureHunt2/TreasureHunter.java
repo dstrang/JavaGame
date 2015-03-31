@@ -2,29 +2,23 @@ package games.treasureHunt2;
 
 import gameEngine.input.action.ForceQuit;
 import gameEngine.input.action.MoveX;
-import gameEngine.input.action.MoveXAxis;
-import gameEngine.input.action.MoveY;
-import gameEngine.input.action.MoveYAxis;
 import gameEngine.input.action.MoveZ;
-import gameEngine.input.action.MoveZAxis;
-import gameEngine.input.action.TurnDownAction;
-import gameEngine.input.action.TurnLeftAction;
-import gameEngine.input.action.TurnPitch;
-import gameEngine.input.action.TurnRightAction;
-import gameEngine.input.action.TurnUpAction;
-import gameEngine.input.action.TurnYaw;
+import games.treasureHunt2.cameras.OrbitCameraController;
 import games.treasureHunt2.events.CollectEvent;
 import games.treasureHunt2.interfaces.ICollectible;
-import games.treasureHunt2.cameras.OrbitCameraController;
-import games.treasureHunt2.controllers.TranslateController;
 import games.treasureHunt2.objects.ScoreHUD;
-import graphicslib3D.Matrix3D;
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
 
 import java.awt.Color;
-import java.awt.Point;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import net.java.games.input.Component.Identifier;
 import sage.app.BaseGame;
@@ -35,14 +29,10 @@ import sage.event.EventManager;
 import sage.event.IEventManager;
 import sage.input.IInputManager;
 import sage.input.InputManager;
-import sage.input.ThirdPersonCameraController;
 import sage.input.action.IAction;
 import sage.renderer.IRenderer;
 import sage.scene.Group;
-import sage.scene.HUDString;
-import sage.scene.RotationController;
 import sage.scene.SceneNode;
-import sage.scene.shape.Cube;
 import sage.scene.shape.Line;
 import sage.scene.shape.Pyramid;
 import sage.scene.shape.Rectangle;
@@ -50,35 +40,42 @@ import utilities.Util;
 
 public class TreasureHunter extends BaseGame {
 	private IDisplaySystem display;
+	private IInputManager inputManager;
+	private ScriptEngineManager scriptManager;
+	private ScriptEngine scriptEngine;
 	private ICamera camera1;
-	private OrbitCameraController cameraController;
 	private IRenderer renderer;
-	private IEventManager em;
-	private IInputManager im;
+	private IEventManager eventManager;
 	private SceneNode player1;
 	private ScoreHUD scoreHUD1;
 	private OrbitCameraController cam1Controller;
 	private Util util = new Util();
 	private int player1Treasures = 0;
 	private Group treasures;
+	private String configFile = "config.js";
 
 	protected void initSystem(){
-		IDisplaySystem display = createDisplaySystem();
-		setDisplaySystem(display);
-		IInputManager inputManager = new InputManager();
-		setInputManager(inputManager);
-		ArrayList<SceneNode> gameWorld = new ArrayList<SceneNode>();
-		setGameWorld(gameWorld);
+		setDisplaySystem(createDisplaySystem());
+		setInputManager(new InputManager());
+		setGameWorld(new ArrayList<SceneNode>());
+		scriptManager = new ScriptEngineManager();
+		scriptEngine = scriptManager.getEngineByName("js");
 	}
 	
 	protected void initGame() {
-		display.setTitle("Treasure Hunter");
+		
+		display = this.getDisplaySystem();
+		inputManager = this.getInputManager();
+		eventManager = EventManager.getInstance();
 		renderer = display.getRenderer();
-		im = getInputManager();
-		em = EventManager.getInstance();
+		
+		display.setTitle("TBD");
+		
 		createPlayers();
 		createScene();
 		initInput();
+		
+		this.executeScript(scriptEngine, configFile);
 	}
 	
 	private IDisplaySystem createDisplaySystem() {
@@ -146,7 +143,7 @@ public class TreasureHunter extends BaseGame {
 		plane.rotate(90, new Vector3D(1, 0, 0));
 		addGameWorldObject(plane);
 		
-		em.addListener(scoreHUD1, CollectEvent.class);
+		eventManager.addListener(scoreHUD1, CollectEvent.class);
 
 		// add axes
 		Point3D origin = new Point3D(0, 0, 0);
@@ -162,25 +159,25 @@ public class TreasureHunter extends BaseGame {
 	}
 
 	private void initInput() {
-//		String gamepad = im.getFirstGamepadName();
-		String keyboard = im.getKeyboardName();
+//		String gamepad = inputManager.getFirstGamepadName();
+		String keyboard = inputManager.getKeyboardName();
 		
-		cam1Controller = new OrbitCameraController(camera1, 90, player1, im, keyboard);
+		cam1Controller = new OrbitCameraController(camera1, 90, player1, inputManager, keyboard);
 
 		IAction player1MoveZ = new MoveZ(player1);
-		im.associateAction(keyboard, Identifier.Key.W, player1MoveZ,
+		inputManager.associateAction(keyboard, Identifier.Key.W, player1MoveZ,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		im.associateAction(keyboard, Identifier.Key.S, player1MoveZ,
+		inputManager.associateAction(keyboard, Identifier.Key.S, player1MoveZ,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		
 		IAction player1MoveX = new MoveX(player1);
-		im.associateAction(keyboard, Identifier.Key.A, player1MoveX,
+		inputManager.associateAction(keyboard, Identifier.Key.A, player1MoveX,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		im.associateAction(keyboard, Identifier.Key.D, player1MoveX,
+		inputManager.associateAction(keyboard, Identifier.Key.D, player1MoveX,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		IAction forceQuit = new ForceQuit(this);
-		im.associateAction(keyboard, Identifier.Key.ESCAPE,
+		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE,
 				forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		super.update(0.0f);
@@ -194,7 +191,7 @@ public class TreasureHunter extends BaseGame {
 				if (collectible.worldBound().intersects(player1.getWorldBound())) {
 					player1Treasures++;
 					CollectEvent collect = new CollectEvent(player1Treasures);
-					em.triggerEvent(collect);
+					eventManager.triggerEvent(collect);
 					removeGameWorldObject((SceneNode) collectible);
 					break;
 				}
@@ -205,6 +202,26 @@ public class TreasureHunter extends BaseGame {
 
 		cam1Controller.update(elapsedTime);
 		super.update(elapsedTime);
+	}
+	
+	private void initConfig(){
+		
+	}
+	
+	private void executeScript(ScriptEngine engine, String scriptFileName) {
+		try {
+			FileReader fileReader = new FileReader(scriptFileName);
+			engine.eval(fileReader);
+			fileReader.close();
+		} catch (FileNotFoundException e1) {
+			System.out.println(scriptFileName + " not found " + e1);
+		} catch (IOException e2) {
+			System.out.println("IO problem with " + scriptFileName + e2);
+		} catch (ScriptException e3) {
+			System.out.println("ScriptException in " + scriptFileName + e3);
+		} catch (NullPointerException e4) {
+			System.out.println("Null ptr exception in " + scriptFileName + e4);
+		}
 	}
 
 	public static void main(String[] args) {
