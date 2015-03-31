@@ -1,6 +1,6 @@
 package games.treasureHunt2.objects;
 
-import games.treasureHunt.interfaces.ICollectible;
+import games.treasureHunt2.interfaces.ICollectible;
 import graphicslib3D.Matrix3D;
 import graphicslib3D.Vector3D;
 

@@ -1,6 +1,6 @@
 package games.treasureHunt2.objects;
 
-import games.treasureHunt.events.CollectEvent;
+import games.treasureHunt2.events.CollectEvent;
 import graphicslib3D.Matrix3D;
 
 import java.nio.FloatBuffer;
