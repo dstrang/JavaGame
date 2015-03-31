@@ -7,7 +7,6 @@ import net.java.games.input.Event;
 import sage.camera.ICamera;
 import sage.input.action.AbstractInputAction;
 import sage.scene.SceneNode;
-import samples.SetSpeedAction;
 
 public class MoveZAxis extends AbstractInputAction{
 	private SceneNode player;

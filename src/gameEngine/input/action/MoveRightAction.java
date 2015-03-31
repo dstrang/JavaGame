@@ -5,7 +5,6 @@ import graphicslib3D.Vector3D;
 import net.java.games.input.Event;
 import sage.camera.ICamera;
 import sage.input.action.AbstractInputAction;
-import samples.SetSpeedAction;
 
 public class MoveRightAction extends AbstractInputAction{
 	private ICamera camera;
