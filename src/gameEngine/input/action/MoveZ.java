@@ -26,10 +26,10 @@ public class MoveZ extends AbstractInputAction{
 		
 		switch (e.getComponent().toString()) {
 		case "W":
-			direction.scale(speed * time);
+			direction.scale(speed);
 			break;
 		case "S":
-			direction.scale((speed * time) * -1);
+			direction.scale(speed * -1);
 			break;
 		}
 		

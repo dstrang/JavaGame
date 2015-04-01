@@ -23,10 +23,10 @@ public class MoveX extends AbstractInputAction {
 		
 		switch (e.getComponent().toString()) {
 		case "A":
-			direction.scale(speed * time);
+			direction.scale(speed);
 			break;
 		case "D":
-			direction.scale(speed * time * -1);
+			direction.scale(speed * -1);
 			break;
 		}
 		
