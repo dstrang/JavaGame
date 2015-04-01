@@ -1,5 +1,6 @@
 package games.treasureHunt2.cameras;
 
+import graphicslib3D.Matrix3D;
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
 import net.java.games.input.Component.Identifier;
@@ -10,10 +11,12 @@ import sage.input.IInputManager;
 import sage.input.action.AbstractInputAction;
 import sage.input.action.IAction;
 import sage.scene.SceneNode;
+import sage.scene.SkyBox;
 import sage.util.MathUtils;
 
 public class OrbitCameraController {
 	private ICamera cam; // the camera being controlled
+	private SkyBox skybox; //skybox moves with the camera
 	private SceneNode target; // the target the camera looks at
 	private float cameraAzimuth = 0; // rotation of camera around target Y axis
 	private float cameraElevation; // elevation of camera above target
@@ -22,8 +25,9 @@ public class OrbitCameraController {
 	private Vector3D worldUpVec;
 	private float turnSpeed = 0.1f;
 
-	public OrbitCameraController(ICamera cam, float azimuth, SceneNode target, IInputManager inputMgr, String controllerName) {
+	public OrbitCameraController(ICamera cam, SkyBox skybox, float azimuth, SceneNode target, IInputManager inputMgr, String controllerName) {
 		this.cam = cam;
+		this.skybox = skybox;
 		this.target = target;
 		worldUpVec = new Vector3D(0, 1, 0);
 		cameraDistanceFromTarget = 2.0f;
@@ -51,6 +55,14 @@ public class OrbitCameraController {
 		Point3D relativePosition = MathUtils.sphericalToCartesian(theta, phi, r);
 		Point3D desiredCameraLoc = relativePosition.add(targetPos);
 		cam.setLocation(desiredCameraLoc);
+		
+		//move skybox to camera location
+		Point3D camLoc = cam.getLocation();
+		Matrix3D camTrans = new Matrix3D();
+		camTrans.translate(camLoc.getX(), camLoc.getY(), camLoc.getZ());
+		skybox.setLocalTranslation(camTrans);
+		
+//		skybox.translate((float)desiredCameraLoc.getX(), (float)desiredCameraLoc.getY(), (float)desiredCameraLoc.getZ());
 	}
 
 	private void setupInput(IInputManager im, String cn) {
