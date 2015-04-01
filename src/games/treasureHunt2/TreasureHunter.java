@@ -16,6 +16,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -143,29 +144,26 @@ public class TreasureHunter extends BaseGame {
 	private void createScene() {
 		// initialize skybox
 		skybox = new SkyBox("Skybox", 20.0f, 20.0f, 20.0f);
-		
-		//load textures
-		Texture northTexture = TextureManager.loadTexture2D("./src/images/jajalien1_front.jpg");
-		Texture southTexture = TextureManager.loadTexture2D("./src/images/jajalien1_back.jpg");
-		Texture eastTexture = TextureManager.loadTexture2D("./src/images/jajalien1_right.jpg");
-		Texture westTexture = TextureManager.loadTexture2D("./src/images/jajalien1_left.jpg");
-		Texture upTexture = TextureManager.loadTexture2D("./src/images/jajalien1_top.jpg");
-		
-		//attach textures to skybox
+
+		// load textures
+		Texture northTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_front.jpg");
+		Texture southTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_back.jpg");
+		Texture eastTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_right.jpg");
+		Texture westTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_left.jpg");
+		Texture upTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_top.jpg");
+
+		// attach textures to skybox
 		skybox.setTexture(SkyBox.Face.North, northTexture);
 		skybox.setTexture(SkyBox.Face.South, southTexture);
 		skybox.setTexture(SkyBox.Face.East, eastTexture);
 		skybox.setTexture(SkyBox.Face.West, westTexture);
 		skybox.setTexture(SkyBox.Face.Up, upTexture);
 		addGameWorldObject(skybox);
-		
-//		// add XZ plane
-//		float planeSize = 100.0f;
-//		Rectangle plane = new Rectangle(planeSize, planeSize);
-//		plane.setColor(Color.GRAY);
-//		plane.rotate(90, new Vector3D(1, 0, 0));
-//		addGameWorldObject(plane);
-		
 		eventManager.addListener(scoreHUD1, CollectEvent.class);
 
 		// add axes
@@ -187,26 +185,12 @@ public class TreasureHunter extends BaseGame {
 	}
 
 	private void initInput() {
-//		String gamepad = inputManager.getFirstGamepadName();
+		String gamepad = inputManager.getFirstGamepadName();
 		String keyboard = inputManager.getKeyboardName();
-		
-		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1, inputManager, keyboard);
+		String controller = gamepad != null ? gamepad : keyboard;
 
-		IAction player1MoveZ = new MoveZ(player1);
-		inputManager.associateAction(keyboard, Identifier.Key.W, player1MoveZ,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(keyboard, Identifier.Key.S, player1MoveZ,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		
-		IAction player1MoveX = new MoveX(player1);
-		inputManager.associateAction(keyboard, Identifier.Key.A, player1MoveX,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(keyboard, Identifier.Key.D, player1MoveX,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		IAction forceQuit = new ForceQuit(this);
-		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE,
-				forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		cam1Controller = new OrbitCameraController(camera1, skybox, 90,
+				player1, inputManager, keyboard);
 
 		super.update(0.0f);
 	}
@@ -231,9 +215,26 @@ public class TreasureHunter extends BaseGame {
 		cam1Controller.update(elapsedTime);
 		super.update(elapsedTime);
 	}
-	
-	private void initConfig(){
-		
+
+	private void initConfig() {
+
+		this.executeScript(scriptEngine, configFile);
+
+		Invocable invocableEngine = (Invocable) scriptEngine;
+
+		try {
+			invocableEngine.invokeFunction("initInput", this, inputManager,
+					player1);
+		} catch (ScriptException e1) {
+			System.out.println("ScriptException in " + configFile + e1);
+		} catch (NoSuchMethodException e2) {
+			System.out
+					.println("No such method exception in " + configFile + e2);
+		} catch (NullPointerException e3) {
+			System.out.println("Null ptr exception reading " + configFile + e3);
+		}
+
+		super.update(0.0f);
 	}
 	
 	private void executeScript(ScriptEngine engine, String scriptFileName) {
