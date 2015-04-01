@@ -80,7 +80,7 @@ public class TreasureHunter extends BaseGame {
 		createScene();
 		createPlayers();
 		initInput();
-		
+		initConfig();
 		this.executeScript(scriptEngine, configFile);
 	}
 	
