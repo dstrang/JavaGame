@@ -75,12 +75,7 @@ public class TreasureHunter extends BaseGame {
 		renderer = display.getRenderer();
 
 		display.setTitle("TBD");
-<<<<<<< HEAD
 
-		createPlayers();
-=======
-		
->>>>>>> ce319572f87ef0ec62abdbb776bfcae071636bbb
 		createScene();
 		createPlayers();
 		initInput();
@@ -186,32 +181,10 @@ public class TreasureHunter extends BaseGame {
 	private void initInput() {
 		// String gamepad = inputManager.getFirstGamepadName();
 		String keyboard = inputManager.getKeyboardName();
-<<<<<<< HEAD
 
-		cam1Controller = new OrbitCameraController(camera1, 90, player1,
+		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1,
 				inputManager, keyboard);
 
-
-=======
-		
-		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1, inputManager, keyboard);
-
-		IAction player1MoveZ = new MoveZ(player1);
-		inputManager.associateAction(keyboard, Identifier.Key.W, player1MoveZ,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(keyboard, Identifier.Key.S, player1MoveZ,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		
-		IAction player1MoveX = new MoveX(player1);
-		inputManager.associateAction(keyboard, Identifier.Key.A, player1MoveX,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(keyboard, Identifier.Key.D, player1MoveX,
-				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-
-		IAction forceQuit = new ForceQuit(this);
-		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE,
-				forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
->>>>>>> ce319572f87ef0ec62abdbb776bfcae071636bbb
 
 		super.update(0.0f);
 	}
