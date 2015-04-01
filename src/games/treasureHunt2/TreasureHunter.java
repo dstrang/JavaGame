@@ -131,8 +131,8 @@ public class TreasureHunter extends BaseGame {
 	private void createPlayers() {
 		player1 = new Pyramid("PLAYER1");
 		player1.scale(0.2f, 0.2f, 0.2f);
-		player1.translate(0, 1, -3);
-		player1.rotate(-90, new Vector3D(0, 1, 0));
+		player1.translate(0, 1, 0);
+		player1.rotate(45, new Vector3D(0, 1, 0));
 		addGameWorldObject(player1);
 		camera1 = new JOGLCamera(renderer);
 		camera1.setPerspectiveFrustum(45, 1, 0.01, 1000);
@@ -177,7 +177,8 @@ public class TreasureHunter extends BaseGame {
 		addGameWorldObject(yAxis);
 		addGameWorldObject(zAxis);
 
-//		ImageBasedHeightMap heightMap = new ImageBasedHeightMap("./src/images/heightmap.jpg");
+		// ImageBasedHeightMap heightMap = new
+		// ImageBasedHeightMap("./src/images/heightmap.jpg");
 		heightMap = new HillHeightMap(129, 2000, 5.0f, 20.0f, (byte) 2, 12345);
 		heightMap.setHeightScale(0.1f);
 		terrain = createTerrainBlock(heightMap);
@@ -221,7 +222,7 @@ public class TreasureHunter extends BaseGame {
 		String keyboard = inputManager.getKeyboardName();
 		String controller = gamepad != null ? gamepad : keyboard;
 
-		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1, inputManager, keyboard);
+		cam1Controller = new OrbitCameraController(camera1, skybox, 225, player1, inputManager, keyboard);
 
 		super.update(0.0f);
 	}
