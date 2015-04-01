@@ -140,22 +140,27 @@ public class TreasureHunter extends BaseGame {
 	private void createScene() {
 		// initialize skybox
 		skybox = new SkyBox("Skybox", 20.0f, 20.0f, 20.0f);
-		
-		//load textures
-		Texture northTexture = TextureManager.loadTexture2D("./src/images/jajalien1_front.jpg");
-		Texture southTexture = TextureManager.loadTexture2D("./src/images/jajalien1_back.jpg");
-		Texture eastTexture = TextureManager.loadTexture2D("./src/images/jajalien1_right.jpg");
-		Texture westTexture = TextureManager.loadTexture2D("./src/images/jajalien1_left.jpg");
-		Texture upTexture = TextureManager.loadTexture2D("./src/images/jajalien1_top.jpg");
-		
-		//attach textures to skybox
+
+		// load textures
+		Texture northTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_front.jpg");
+		Texture southTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_back.jpg");
+		Texture eastTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_right.jpg");
+		Texture westTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_left.jpg");
+		Texture upTexture = TextureManager
+				.loadTexture2D("./src/images/jajalien1_top.jpg");
+
+		// attach textures to skybox
 		skybox.setTexture(SkyBox.Face.North, northTexture);
 		skybox.setTexture(SkyBox.Face.South, southTexture);
 		skybox.setTexture(SkyBox.Face.East, eastTexture);
 		skybox.setTexture(SkyBox.Face.West, westTexture);
 		skybox.setTexture(SkyBox.Face.Up, upTexture);
 		addGameWorldObject(skybox);
-		
+
 		// add XZ plane
 		float planeSize = 100.0f;
 		Rectangle plane = new Rectangle(planeSize, planeSize);
@@ -179,12 +184,12 @@ public class TreasureHunter extends BaseGame {
 	}
 
 	private void initInput() {
-		// String gamepad = inputManager.getFirstGamepadName();
+		String gamepad = inputManager.getFirstGamepadName();
 		String keyboard = inputManager.getKeyboardName();
+		String controller = gamepad != null ? gamepad : keyboard;
 
-		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1,
-				inputManager, keyboard);
-
+		cam1Controller = new OrbitCameraController(camera1, skybox, 90,
+				player1, inputManager, controller);
 
 		super.update(0.0f);
 	}
@@ -218,7 +223,8 @@ public class TreasureHunter extends BaseGame {
 		Invocable invocableEngine = (Invocable) scriptEngine;
 
 		try {
-			invocableEngine.invokeFunction("initInput", this, inputManager, player1);
+			invocableEngine.invokeFunction("initInput", this, inputManager,
+					player1);
 		} catch (ScriptException e1) {
 			System.out.println("ScriptException in " + configFile + e1);
 		} catch (NoSuchMethodException e2) {
@@ -228,7 +234,7 @@ public class TreasureHunter extends BaseGame {
 			System.out.println("Null ptr exception reading " + configFile + e3);
 		}
 
-		 super.update(0.0f);
+		super.update(0.0f);
 
 	}
 

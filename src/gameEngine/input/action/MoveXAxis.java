@@ -22,10 +22,10 @@ public class MoveXAxis extends AbstractInputAction {
 		direction = direction.mult(playerMatrix);
 		
 		if(e.getValue() < -0.7){
-			direction.scale(speed * time);
+			direction.scale(speed);
 			player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
 		}else if(e.getValue() > 0.7){
-			direction.scale(speed * time * -1);
+			direction.scale(speed * -1);
 			player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
 		}
 	}
