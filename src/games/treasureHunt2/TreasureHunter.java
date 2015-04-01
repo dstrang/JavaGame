@@ -33,9 +33,12 @@ import sage.input.action.IAction;
 import sage.renderer.IRenderer;
 import sage.scene.Group;
 import sage.scene.SceneNode;
+import sage.scene.SkyBox;
 import sage.scene.shape.Line;
 import sage.scene.shape.Pyramid;
 import sage.scene.shape.Rectangle;
+import sage.texture.Texture;
+import sage.texture.TextureManager;
 import utilities.Util;
 
 public class TreasureHunter extends BaseGame {
@@ -43,6 +46,7 @@ public class TreasureHunter extends BaseGame {
 	private IInputManager inputManager;
 	private ScriptEngineManager scriptManager;
 	private ScriptEngine scriptEngine;
+	private SkyBox skybox;
 	private ICamera camera1;
 	private IRenderer renderer;
 	private IEventManager eventManager;
@@ -71,8 +75,8 @@ public class TreasureHunter extends BaseGame {
 		
 		display.setTitle("TBD");
 		
-		createPlayers();
 		createScene();
+		createPlayers();
 		initInput();
 		
 		this.executeScript(scriptEngine, configFile);
@@ -136,6 +140,24 @@ public class TreasureHunter extends BaseGame {
 	}
 
 	private void createScene() {
+		// initialize skybox
+		skybox = new SkyBox("Skybox", 20.0f, 20.0f, 20.0f);
+		
+		//load textures
+		Texture northTexture = TextureManager.loadTexture2D("./src/images/jajalien1_front.jpg");
+		Texture southTexture = TextureManager.loadTexture2D("./src/images/jajalien1_back.jpg");
+		Texture eastTexture = TextureManager.loadTexture2D("./src/images/jajalien1_right.jpg");
+		Texture westTexture = TextureManager.loadTexture2D("./src/images/jajalien1_left.jpg");
+		Texture upTexture = TextureManager.loadTexture2D("./src/images/jajalien1_top.jpg");
+		
+		//attach textures to skybox
+		skybox.setTexture(SkyBox.Face.North, northTexture);
+		skybox.setTexture(SkyBox.Face.South, southTexture);
+		skybox.setTexture(SkyBox.Face.East, eastTexture);
+		skybox.setTexture(SkyBox.Face.West, westTexture);
+		skybox.setTexture(SkyBox.Face.Up, upTexture);
+		addGameWorldObject(skybox);
+		
 		// add XZ plane
 		float planeSize = 100.0f;
 		Rectangle plane = new Rectangle(planeSize, planeSize);
@@ -162,7 +184,7 @@ public class TreasureHunter extends BaseGame {
 //		String gamepad = inputManager.getFirstGamepadName();
 		String keyboard = inputManager.getKeyboardName();
 		
-		cam1Controller = new OrbitCameraController(camera1, 90, player1, inputManager, keyboard);
+		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1, inputManager, keyboard);
 
 		IAction player1MoveZ = new MoveZ(player1);
 		inputManager.associateAction(keyboard, Identifier.Key.W, player1MoveZ,
