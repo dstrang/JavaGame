@@ -181,6 +181,7 @@ public class TreasureHunter extends BaseGame {
 		//add terrain
 		float [] heightMap = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 		TerrainBlock terrain = new TerrainBlock("Terrain", 4, new Vector3D(5, 0.5, 5), heightMap, origin);
+		
 		addGameWorldObject(terrain);
 	}
 

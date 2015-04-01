@@ -24,6 +24,7 @@ public class OrbitCameraController {
 	private Point3D targetPos; // avatar’s position in the world
 	private Vector3D worldUpVec;
 	private float turnSpeed = 0.1f;
+	private boolean toggle = true;
 
 	public OrbitCameraController(ICamera cam, SkyBox skybox, float azimuth, SceneNode target, IInputManager inputMgr, String controllerName) {
 		this.cam = cam;
@@ -68,12 +69,14 @@ public class OrbitCameraController {
 	private void setupInput(IInputManager im, String cn) {
 		IAction orbitAction = new OrbitAroundAction();
 		IAction zoomAction = new ZoomAction();
+		IAction toggleAction = new ToggleAvatarRotation();
 		im.associateAction(cn, Identifier.Axis.RX, orbitAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Axis.RY, zoomAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Key.LEFT, orbitAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Key.RIGHT, orbitAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Key.UP, zoomAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Key.DOWN, zoomAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateAction(cn, Identifier.Key.T, toggleAction, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 	}
 
 	private class OrbitAroundAction extends AbstractInputAction {
@@ -82,9 +85,17 @@ public class OrbitCameraController {
 			switch(e.getComponent().toString()){
 			case "Left":
 				rotAmount = turnSpeed * time;
+				if (toggle) 
+				{
+					target.rotate(rotAmount, worldUpVec);
+				}
 				break;
 			case "Right":
 				rotAmount = turnSpeed * time * -1;
+				if (toggle) 
+				{
+					target.rotate(rotAmount, worldUpVec);
+				}
 				break;
 			case "X Rotation":
 				if (e.getValue() < -0.2) {
@@ -126,6 +137,14 @@ public class OrbitCameraController {
 			}else if(cameraDistanceFromTarget > 3.0){
 				cameraDistanceFromTarget = 3.0f;
 			}
+		}
+	}
+	
+	private class ToggleAvatarRotation extends AbstractInputAction
+	{
+		public void performAction(float time, Event e)
+		{
+			toggle = !toggle; //Toggle whether avatar will rotate with camera
 		}
 	}
 }
