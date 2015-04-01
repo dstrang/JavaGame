@@ -38,6 +38,11 @@ import sage.scene.SkyBox;
 import sage.scene.shape.Line;
 import sage.scene.shape.Pyramid;
 import sage.scene.shape.Rectangle;
+import sage.scene.state.RenderState.RenderStateType;
+import sage.scene.state.TextureState;
+import sage.terrain.AbstractHeightMap;
+import sage.terrain.HillHeightMap;
+import sage.terrain.ImageBasedHeightMap;
 import sage.terrain.TerrainBlock;
 import sage.texture.Texture;
 import sage.texture.TextureManager;
@@ -59,34 +64,35 @@ public class TreasureHunter extends BaseGame {
 	private int player1Treasures = 0;
 	private Group treasures;
 	private String configFile = "config.js";
+	private TerrainBlock terrain;
+	private HillHeightMap heightMap;
 
-	protected void initSystem(){
+	protected void initSystem() {
 		setDisplaySystem(createDisplaySystem());
 		setInputManager(new InputManager());
 		setGameWorld(new ArrayList<SceneNode>());
 		scriptManager = new ScriptEngineManager();
 		scriptEngine = scriptManager.getEngineByName("js");
 	}
-	
+
 	protected void initGame() {
-		
+
 		display = this.getDisplaySystem();
 		inputManager = this.getInputManager();
 		eventManager = EventManager.getInstance();
 		renderer = display.getRenderer();
-		
+
 		display.setTitle("TBD");
-		
+
 		createScene();
 		createPlayers();
 		initInput();
 		initConfig();
 		this.executeScript(scriptEngine, configFile);
 	}
-	
+
 	private IDisplaySystem createDisplaySystem() {
-		display = new FSDisplaySystem(800, 600, 24, 20, false,
-				"sage.renderer.jogl.JOGLRenderer");
+		display = new FSDisplaySystem(800, 600, 24, 20, false, "sage.renderer.jogl.JOGLRenderer");
 		System.out.println("\nWaiting for display creation...");
 
 		int count = 0;
@@ -116,19 +122,17 @@ public class TreasureHunter extends BaseGame {
 	protected void shutdown() {
 		display.close();
 	}
-	
-	protected void render(){
+
+	protected void render() {
 		renderer.setCamera(camera1);
 		super.render();
 	}
 
-
-
 	private void createPlayers() {
 		player1 = new Pyramid("PLAYER1");
 		player1.scale(0.2f, 0.2f, 0.2f);
-		player1.translate(0, 1, 0);
-		player1.rotate(-90, new Vector3D(0,1,0));
+		player1.translate(0, 1, -3);
+		player1.rotate(-90, new Vector3D(0, 1, 0));
 		addGameWorldObject(player1);
 		camera1 = new JOGLCamera(renderer);
 		camera1.setPerspectiveFrustum(45, 1, 0.01, 1000);
@@ -136,7 +140,7 @@ public class TreasureHunter extends BaseGame {
 		createPlayerHUDs();
 	}
 
-	private void createPlayerHUDs() {	
+	private void createPlayerHUDs() {
 		scoreHUD1 = new ScoreHUD(0.01, 0.06);
 		camera1.addToHUD(scoreHUD1);
 	}
@@ -146,16 +150,11 @@ public class TreasureHunter extends BaseGame {
 		skybox = new SkyBox("Skybox", 20.0f, 20.0f, 20.0f);
 
 		// load textures
-		Texture northTexture = TextureManager
-				.loadTexture2D("./src/images/jajalien1_front.jpg");
-		Texture southTexture = TextureManager
-				.loadTexture2D("./src/images/jajalien1_back.jpg");
-		Texture eastTexture = TextureManager
-				.loadTexture2D("./src/images/jajalien1_right.jpg");
-		Texture westTexture = TextureManager
-				.loadTexture2D("./src/images/jajalien1_left.jpg");
-		Texture upTexture = TextureManager
-				.loadTexture2D("./src/images/jajalien1_top.jpg");
+		Texture northTexture = TextureManager.loadTexture2D("./src/images/jajalien1_front.jpg");
+		Texture southTexture = TextureManager.loadTexture2D("./src/images/jajalien1_back.jpg");
+		Texture eastTexture = TextureManager.loadTexture2D("./src/images/jajalien1_right.jpg");
+		Texture westTexture = TextureManager.loadTexture2D("./src/images/jajalien1_left.jpg");
+		Texture upTexture = TextureManager.loadTexture2D("./src/images/jajalien1_top.jpg");
 
 		// attach textures to skybox
 		skybox.setTexture(SkyBox.Face.North, northTexture);
@@ -177,12 +176,44 @@ public class TreasureHunter extends BaseGame {
 		addGameWorldObject(xAxis);
 		addGameWorldObject(yAxis);
 		addGameWorldObject(zAxis);
-		
-		//add terrain
-		float [] heightMap = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-		TerrainBlock terrain = new TerrainBlock("Terrain", 4, new Vector3D(5, 0.5, 5), heightMap, origin);
-		
+
+//		ImageBasedHeightMap heightMap = new ImageBasedHeightMap("./src/images/heightmap.jpg");
+		heightMap = new HillHeightMap(129, 2000, 5.0f, 20.0f, (byte) 2, 12345);
+		heightMap.setHeightScale(0.1f);
+		terrain = createTerrainBlock(heightMap);
+		TextureState grassState;
+		Texture grassTexture = TextureManager.loadTexture2D("./src/images/grass.jpg");
+		grassTexture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
+
+		grassState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
+
+		grassState.setTexture(grassTexture, 0);
+		grassState.setEnabled(true);
+		terrain.setRenderState(grassState);
+
+		// add terrain
+		// float [] heightMap = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+		// 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+		// terrain = new TerrainBlock("Terrain", 4, new Vector3D(1,1,1),
+		// heightMap, heightMap);
+
+		// terrain.setDetailTexture(1, 1);
+
+		// terrain.setTexture(eastTexture);
+
 		addGameWorldObject(terrain);
+	}
+
+	private TerrainBlock createTerrainBlock(AbstractHeightMap heightMap) {
+		float heightScale = .005f;
+		Vector3D terrainScale = new Vector3D(.2, heightScale, .2);
+		int terrainSize = heightMap.getSize();
+		float cornerHeight = heightMap.getTrueHeightAtPoint(0, 0) * heightScale;
+		Point3D terrainOrigin = new Point3D(0, -cornerHeight, 0);
+		String name = "terrain" + heightMap.getClass().getSimpleName();
+		TerrainBlock terrain = new TerrainBlock(name, terrainSize, terrainScale, heightMap.getHeightData(), terrainOrigin);
+		return terrain;
+
 	}
 
 	private void initInput() {
@@ -190,8 +221,7 @@ public class TreasureHunter extends BaseGame {
 		String keyboard = inputManager.getKeyboardName();
 		String controller = gamepad != null ? gamepad : keyboard;
 
-		cam1Controller = new OrbitCameraController(camera1, skybox, 90,
-				player1, inputManager, keyboard);
+		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1, inputManager, keyboard);
 
 		super.update(0.0f);
 	}
@@ -211,6 +241,17 @@ public class TreasureHunter extends BaseGame {
 			}
 		}
 
+		if (terrain.getWorldBound().intersects(player1.getWorldBound())) {
+			Point3D avLoc = new Point3D(player1.getLocalTranslation().getCol(3));
+			float x = (float) avLoc.getX();
+			float z = (float) avLoc.getZ();
+			float terHeight = terrain.getHeight(x, z);
+			float desiredHeight = terHeight + (float) terrain.getOrigin().getY() + 0.5f;
+			if (!Float.isNaN(desiredHeight)) {
+				player1.getLocalTranslation().setElementAt(1, 3, desiredHeight);
+			}
+		}
+
 		scoreHUD1.updateTime(elapsedTime);
 
 		cam1Controller.update(elapsedTime);
@@ -224,20 +265,18 @@ public class TreasureHunter extends BaseGame {
 		Invocable invocableEngine = (Invocable) scriptEngine;
 
 		try {
-			invocableEngine.invokeFunction("initInput", this, inputManager,
-					player1);
+			invocableEngine.invokeFunction("initInput", this, inputManager, player1);
 		} catch (ScriptException e1) {
 			System.out.println("ScriptException in " + configFile + e1);
 		} catch (NoSuchMethodException e2) {
-			System.out
-					.println("No such method exception in " + configFile + e2);
+			System.out.println("No such method exception in " + configFile + e2);
 		} catch (NullPointerException e3) {
 			System.out.println("Null ptr exception reading " + configFile + e3);
 		}
 
 		super.update(0.0f);
 	}
-	
+
 	private void executeScript(ScriptEngine engine, String scriptFileName) {
 		try {
 			FileReader fileReader = new FileReader(scriptFileName);
