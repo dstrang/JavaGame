@@ -16,7 +16,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -38,6 +37,7 @@ import sage.scene.SkyBox;
 import sage.scene.shape.Line;
 import sage.scene.shape.Pyramid;
 import sage.scene.shape.Rectangle;
+import sage.terrain.TerrainBlock;
 import sage.texture.Texture;
 import sage.texture.TextureManager;
 import utilities.Util;
@@ -59,29 +59,30 @@ public class TreasureHunter extends BaseGame {
 	private Group treasures;
 	private String configFile = "config.js";
 
-	protected void initSystem() {
+	protected void initSystem(){
 		setDisplaySystem(createDisplaySystem());
 		setInputManager(new InputManager());
 		setGameWorld(new ArrayList<SceneNode>());
 		scriptManager = new ScriptEngineManager();
 		scriptEngine = scriptManager.getEngineByName("js");
 	}
-
+	
 	protected void initGame() {
-
+		
 		display = this.getDisplaySystem();
 		inputManager = this.getInputManager();
 		eventManager = EventManager.getInstance();
 		renderer = display.getRenderer();
-
+		
 		display.setTitle("TBD");
-
+		
 		createScene();
 		createPlayers();
 		initInput();
-		initConfig();
+		
+		this.executeScript(scriptEngine, configFile);
 	}
-
+	
 	private IDisplaySystem createDisplaySystem() {
 		display = new FSDisplaySystem(800, 600, 24, 20, false,
 				"sage.renderer.jogl.JOGLRenderer");
@@ -114,17 +115,19 @@ public class TreasureHunter extends BaseGame {
 	protected void shutdown() {
 		display.close();
 	}
-
-	protected void render() {
+	
+	protected void render(){
 		renderer.setCamera(camera1);
 		super.render();
 	}
 
+
+
 	private void createPlayers() {
 		player1 = new Pyramid("PLAYER1");
 		player1.scale(0.2f, 0.2f, 0.2f);
-		player1.translate(50, 1, 0);
-		player1.rotate(-90, new Vector3D(0, 1, 0));
+		player1.translate(0, 1, 0);
+		player1.rotate(-90, new Vector3D(0,1,0));
 		addGameWorldObject(player1);
 		camera1 = new JOGLCamera(renderer);
 		camera1.setPerspectiveFrustum(45, 1, 0.01, 1000);
@@ -132,7 +135,7 @@ public class TreasureHunter extends BaseGame {
 		createPlayerHUDs();
 	}
 
-	private void createPlayerHUDs() {
+	private void createPlayerHUDs() {	
 		scoreHUD1 = new ScoreHUD(0.01, 0.06);
 		camera1.addToHUD(scoreHUD1);
 	}
@@ -156,13 +159,13 @@ public class TreasureHunter extends BaseGame {
 		skybox.setTexture(SkyBox.Face.Up, upTexture);
 		addGameWorldObject(skybox);
 		
-		// add XZ plane
-		float planeSize = 100.0f;
-		Rectangle plane = new Rectangle(planeSize, planeSize);
-		plane.setColor(Color.GRAY);
-		plane.rotate(90, new Vector3D(1, 0, 0));
-		addGameWorldObject(plane);
-
+//		// add XZ plane
+//		float planeSize = 100.0f;
+//		Rectangle plane = new Rectangle(planeSize, planeSize);
+//		plane.setColor(Color.GRAY);
+//		plane.rotate(90, new Vector3D(1, 0, 0));
+//		addGameWorldObject(plane);
+		
 		eventManager.addListener(scoreHUD1, CollectEvent.class);
 
 		// add axes
@@ -176,15 +179,34 @@ public class TreasureHunter extends BaseGame {
 		addGameWorldObject(xAxis);
 		addGameWorldObject(yAxis);
 		addGameWorldObject(zAxis);
+		
+		//add terrain
+		float [] heightMap = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+		TerrainBlock terrain = new TerrainBlock("Terrain", 4, new Vector3D(5, 0.5, 5), heightMap, origin);
+		addGameWorldObject(terrain);
 	}
 
 	private void initInput() {
-		// String gamepad = inputManager.getFirstGamepadName();
+//		String gamepad = inputManager.getFirstGamepadName();
 		String keyboard = inputManager.getKeyboardName();
+		
+		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1, inputManager, keyboard);
 
-		cam1Controller = new OrbitCameraController(camera1, skybox, 90, player1,
-				inputManager, keyboard);
+		IAction player1MoveZ = new MoveZ(player1);
+		inputManager.associateAction(keyboard, Identifier.Key.W, player1MoveZ,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(keyboard, Identifier.Key.S, player1MoveZ,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		
+		IAction player1MoveX = new MoveX(player1);
+		inputManager.associateAction(keyboard, Identifier.Key.A, player1MoveX,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(keyboard, Identifier.Key.D, player1MoveX,
+				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
+		IAction forceQuit = new ForceQuit(this);
+		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE,
+				forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		super.update(0.0f);
 	}
@@ -194,8 +216,7 @@ public class TreasureHunter extends BaseGame {
 		for (SceneNode s : getGameWorld()) {
 			if (s instanceof ICollectible) {
 				ICollectible collectible = (ICollectible) s;
-				if (collectible.worldBound()
-						.intersects(player1.getWorldBound())) {
+				if (collectible.worldBound().intersects(player1.getWorldBound())) {
 					player1Treasures++;
 					CollectEvent collect = new CollectEvent(player1Treasures);
 					eventManager.triggerEvent(collect);
@@ -210,28 +231,11 @@ public class TreasureHunter extends BaseGame {
 		cam1Controller.update(elapsedTime);
 		super.update(elapsedTime);
 	}
-
-	private void initConfig() {
-
-		this.executeScript(scriptEngine, configFile);
-
-		Invocable invocableEngine = (Invocable) scriptEngine;
-
-		try {
-			invocableEngine.invokeFunction("initInput", this, inputManager, player1);
-		} catch (ScriptException e1) {
-			System.out.println("ScriptException in " + configFile + e1);
-		} catch (NoSuchMethodException e2) {
-			System.out
-					.println("No such method exception in " + configFile + e2);
-		} catch (NullPointerException e3) {
-			System.out.println("Null ptr exception reading " + configFile + e3);
-		}
-
-		 super.update(0.0f);
-
+	
+	private void initConfig(){
+		
 	}
-
+	
 	private void executeScript(ScriptEngine engine, String scriptFileName) {
 		try {
 			FileReader fileReader = new FileReader(scriptFileName);
