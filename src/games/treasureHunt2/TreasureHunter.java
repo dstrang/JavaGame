@@ -1,8 +1,7 @@
 package games.treasureHunt2;
 
-import gameEngine.input.action.ForceQuit;
-import gameEngine.input.action.MoveX;
-import gameEngine.input.action.MoveZ;
+import games.treasureHunt2.networking.GameClient;
+import games.treasureHunt2.networking.GameServer;
 import games.treasureHunt2.cameras.OrbitCameraController;
 import games.treasureHunt2.events.CollectEvent;
 import games.treasureHunt2.interfaces.ICollectible;
@@ -14,6 +13,8 @@ import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import javax.script.Invocable;
@@ -21,7 +22,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import net.java.games.input.Component.Identifier;
 import sage.app.BaseGame;
 import sage.camera.ICamera;
 import sage.camera.JOGLCamera;
@@ -30,19 +30,17 @@ import sage.event.EventManager;
 import sage.event.IEventManager;
 import sage.input.IInputManager;
 import sage.input.InputManager;
-import sage.input.action.IAction;
+import sage.networking.IGameConnection.ProtocolType;
 import sage.renderer.IRenderer;
 import sage.scene.Group;
 import sage.scene.SceneNode;
 import sage.scene.SkyBox;
 import sage.scene.shape.Line;
 import sage.scene.shape.Pyramid;
-import sage.scene.shape.Rectangle;
 import sage.scene.state.RenderState.RenderStateType;
 import sage.scene.state.TextureState;
 import sage.terrain.AbstractHeightMap;
 import sage.terrain.HillHeightMap;
-import sage.terrain.ImageBasedHeightMap;
 import sage.terrain.TerrainBlock;
 import sage.texture.Texture;
 import sage.texture.TextureManager;
@@ -66,6 +64,19 @@ public class TreasureHunter extends BaseGame {
 	private String configFile = "config.js";
 	private TerrainBlock terrain;
 	private HillHeightMap heightMap;
+	private static GameServer GameServer;
+	private String serverAddress;
+	private int serverPort;
+	private ProtocolType serverProtocol;
+	private GameClient thisClient;
+	private boolean serverConnected;
+
+	public TreasureHunter(String serverAddr, int sPort) {
+		super();
+		this.serverAddress = serverAddr;
+		this.serverPort = sPort;
+		this.serverProtocol = ProtocolType.TCP;
+	}
 
 	protected void initSystem() {
 		setDisplaySystem(createDisplaySystem());
@@ -89,6 +100,18 @@ public class TreasureHunter extends BaseGame {
 		initInput();
 		initConfig();
 		this.executeScript(scriptEngine, configFile);
+
+		try {
+			thisClient = new GameClient(InetAddress.getByName(serverAddress), serverPort, serverProtocol, this);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		if (thisClient != null) {
+			thisClient.sendJoinMessage();
+		}
 	}
 
 	private IDisplaySystem createDisplaySystem() {
@@ -120,6 +143,15 @@ public class TreasureHunter extends BaseGame {
 	}
 
 	protected void shutdown() {
+		super.shutdown();
+		if (thisClient != null) {
+			thisClient.sendByeMessage();
+			try {
+				thisClient.shutdown();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		display.close();
 	}
 
@@ -229,18 +261,21 @@ public class TreasureHunter extends BaseGame {
 
 	public void update(float elapsedTime) {
 
-		for (SceneNode s : getGameWorld()) {
-			if (s instanceof ICollectible) {
-				ICollectible collectible = (ICollectible) s;
-				if (collectible.worldBound().intersects(player1.getWorldBound())) {
-					player1Treasures++;
-					CollectEvent collect = new CollectEvent(player1Treasures);
-					eventManager.triggerEvent(collect);
-					removeGameWorldObject((SceneNode) collectible);
-					break;
-				}
-			}
-		}
+		if (thisClient != null)
+			thisClient.processPackets();
+
+		// for (SceneNode s : getGameWorld()) {
+		// if (s instanceof ICollectible) {
+		// ICollectible collectible = (ICollectible) s;
+		// if (collectible.worldBound().intersects(player1.getWorldBound())) {
+		// player1Treasures++;
+		// CollectEvent collect = new CollectEvent(player1Treasures);
+		// eventManager.triggerEvent(collect);
+		// removeGameWorldObject((SceneNode) collectible);
+		// break;
+		// }
+		// }
+		// }
 
 		if (terrain.getWorldBound().intersects(player1.getWorldBound())) {
 			Point3D avLoc = new Point3D(player1.getLocalTranslation().getCol(3));
@@ -295,6 +330,27 @@ public class TreasureHunter extends BaseGame {
 	}
 
 	public static void main(String[] args) {
-		new TreasureHunter().start();
+		try {
+			int localport = 50000;
+//			GameServer = new GameServer(Integer.parseInt(args[1]));
+			GameServer = new GameServer(localport);
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		String server = "localhost";
+		int port = 50001;
+
+		new TreasureHunter(server, port).start();
+	}
+
+	public Vector3D getPlayerPosition() {
+		return player1.getLocalTranslation().getCol(3);
+	}
+
+	public void setIsConnected(boolean b) {
+		serverConnected = true;
 	}
 }
