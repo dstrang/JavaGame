@@ -183,11 +183,11 @@ public class AwesomeGame extends BaseGame {
 		skybox = new SkyBox("Skybox", 20.0f, 20.0f, 20.0f);
 
 		// load textures
-		Texture northTexture = TextureManager.loadTexture2D("/JavaGame/src/images/jajalien1_front.jpg");
-		Texture southTexture = TextureManager.loadTexture2D("/JavaGame/src/images/jajalien1_back.jpg");
-		Texture eastTexture = TextureManager.loadTexture2D("/JavaGame/src/images/jajalien1_right.jpg");
-		Texture westTexture = TextureManager.loadTexture2D("/JavaGame/src/images/jajalien1_left.jpg");
-		Texture upTexture = TextureManager.loadTexture2D("/JavaGame/src/images/jajalien1_top.jpg");
+		Texture northTexture = TextureManager.loadTexture2D("src/images/jajalien1_front.jpg");
+		Texture southTexture = TextureManager.loadTexture2D("src/images/jajalien1_back.jpg");
+		Texture eastTexture = TextureManager.loadTexture2D("src/images/jajalien1_right.jpg");
+		Texture westTexture = TextureManager.loadTexture2D("src/images/jajalien1_left.jpg");
+		Texture upTexture = TextureManager.loadTexture2D("src/images/jajalien1_top.jpg");
 
 		// attach textures to skybox
 		skybox.setTexture(SkyBox.Face.North, northTexture);
@@ -216,7 +216,7 @@ public class AwesomeGame extends BaseGame {
 		heightMap.setHeightScale(0.1f);
 		terrain = createTerrainBlock(heightMap);
 		TextureState grassState;
-		Texture grassTexture = TextureManager.loadTexture2D("/JavaGame/src/images/grass.jpg");
+		Texture grassTexture = TextureManager.loadTexture2D("src/images/grass.jpg");
 		grassTexture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
 
 		grassState = (TextureState) renderer.createRenderState(RenderStateType.Texture);

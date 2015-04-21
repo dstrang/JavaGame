@@ -1,7 +1,7 @@
 var JavaPackages = new JavaImporter(
 		Packages.net.java.games.input.Component.Identifier,
 		Packages.sage.input.IInputManager, 
-		Packages.gameEngine.input.action);
+		Packages.input);
 with (JavaPackages) {
 
 	function initInput(game, inputManager, player) {
