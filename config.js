@@ -1,10 +1,18 @@
+//
+//var serverAddress = "localhost";
+//var serverPort = 50001;
+
+
 var JavaPackages = new JavaImporter(
 		Packages.net.java.games.input.Component.Identifier,
-		Packages.sage.input.IInputManager, 
+		Packages.sage.input.IInputManager,
 		Packages.input);
 with (JavaPackages) {
 
 	function initInput(game, inputManager, player) {
+
+//		var serverAddress = "localhost";
+//		var serverPort = 50001;
 
 		var key = net.java.games.input.Component.Identifier.Key;
 		var axis = net.java.games.input.Component.Identifier.Axis;
@@ -17,7 +25,7 @@ with (JavaPackages) {
 		var moveZ = new MoveZ(player);
 		var moveXAxis = new MoveXAxis(player);
 		var moveZAxis = new MoveZAxis(player);
-
+		
 		var inputMap = {
 			"keyboard": [
 				{ "Key": key.A, "Action": moveX, "Keypress": keypress.REPEAT_WHILE_DOWN },

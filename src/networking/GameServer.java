@@ -27,6 +27,7 @@ public class GameServer extends GameConnectionServer<UUID> {
 
 	public void processPacket(Object o, InetAddress senderIP, int sndPort) {
 		String message = (String) o;
+		System.out.println(message);
 		String[] msgTokens = message.split(",");
 		if (msgTokens.length > 0) {
 			if (msgTokens[0].compareTo("bye") == 0) {

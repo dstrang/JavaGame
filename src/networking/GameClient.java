@@ -39,14 +39,16 @@ public class GameClient extends GameConnectionClient {
 			UUID ghostID = UUID.fromString(msgTokens[1]);
 			removeGhostAvatar(ghostID);
 		}
+		
 		if (msgTokens[0].compareTo("dsfr") == 0) {
 			UUID ghostID = UUID.fromString(msgTokens[1]);
 //			createGhostAvatar(ghostID, ghostPosition);
 			createGhostAvatar(ghostID);
 		}
-		if (msgTokens[0].compareTo("wsds") == 0) {
+		
+		if (msgTokens[0].compareTo("create") == 0) {
 		}
-
+		
 		if (msgTokens[0].compareTo("wsds") == 0) {
 		}
 

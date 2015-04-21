@@ -2,6 +2,9 @@ package game;
 
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
+import input.ForceQuit;
+import input.MoveX;
+import input.MoveZ;
 import interfaces.ICollectible;
 
 import java.awt.Color;
@@ -17,6 +20,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import net.java.games.input.Component.Identifier;
 import networking.GameClient;
 import networking.GameServer;
 import cameras.OrbitCameraController;
@@ -31,6 +35,7 @@ import sage.event.EventManager;
 import sage.event.IEventManager;
 import sage.input.IInputManager;
 import sage.input.InputManager;
+import sage.input.action.IAction;
 import sage.networking.IGameConnection.ProtocolType;
 import sage.renderer.IRenderer;
 import sage.scene.Group;
@@ -72,11 +77,11 @@ public class AwesomeGame extends BaseGame {
 	private GameClient thisClient;
 	private boolean serverConnected;
 
-	public AwesomeGame(String serverAddr, int sPort) {
+	public AwesomeGame() {
 		super();
-		this.serverAddress = serverAddr;
-		this.serverPort = sPort;
-		this.serverProtocol = ProtocolType.TCP;
+//		this.serverAddress = serverAddr;
+//		this.serverPort = sPort;
+//		this.serverProtocol = ProtocolType.TCP;
 	}
 
 	protected void initSystem() {
@@ -100,8 +105,7 @@ public class AwesomeGame extends BaseGame {
 		createPlayers();
 		initInput();
 		initConfig();
-		this.executeScript(scriptEngine, configFile);
-
+		
 		try {
 			thisClient = new GameClient(InetAddress.getByName(serverAddress), serverPort, serverProtocol, this);
 		} catch (UnknownHostException e) {
@@ -255,7 +259,17 @@ public class AwesomeGame extends BaseGame {
 		String keyboard = inputManager.getKeyboardName();
 		String controller = gamepad != null ? gamepad : keyboard;
 
-		cam1Controller = new OrbitCameraController(camera1, skybox, 225, player1, inputManager, keyboard);
+		cam1Controller = new OrbitCameraController(camera1, skybox, 225, player1, inputManager, controller);
+		
+		IAction moveX = new MoveX(player1);
+		IAction moveZ = new MoveZ(player1);
+		IAction forceQuit = new ForceQuit(this);
+		
+		inputManager.associateAction(controller, Identifier.Key.A, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(controller, Identifier.Key.D, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(controller, Identifier.Key.W, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(controller, Identifier.Key.S, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE, forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		super.update(0.0f);
 	}
@@ -296,20 +310,41 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	private void initConfig() {
+		
+//		this.executeScript(scriptEngine, configFile);
+//		
+//		Invocable invocableEngine = (Invocable) scriptEngine;
+//
+//		try {
+//			invocableEngine.invokeFunction("initInput", this, inputManager, player1);
+//		} catch (ScriptException e1) {
+//			System.out.println("ScriptException in " + configFile + e1);
+//		} catch (NoSuchMethodException e2) {
+//			System.out.println("No such method exception in " + configFile + e2);
+//		} catch (NullPointerException e3) {
+//			System.out.println("Null ptr exception reading " + configFile + e3);
+//		}
+		
 
-		this.executeScript(scriptEngine, configFile);
+		this.serverAddress = "localhost";
+		this.serverPort = 50001;
+		this.serverProtocol = ProtocolType.TCP;
+		
+//		try {
+//			try {
+//				scriptEngine.eval(new java.io.FileReader(configFile));
+//			} catch (FileNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		} catch (ScriptException e) {
+//			e.printStackTrace();
+//		}
+//		
+//		System.out.println(scriptEngine.get("serverAddress"));
+//		System.out.println(scriptEngine.get("serverPort"));
+//		System.out.println(scriptEngine.get("serverProtocol"));
 
-		Invocable invocableEngine = (Invocable) scriptEngine;
-
-		try {
-			invocableEngine.invokeFunction("initInput", this, inputManager, player1);
-		} catch (ScriptException e1) {
-			System.out.println("ScriptException in " + configFile + e1);
-		} catch (NoSuchMethodException e2) {
-			System.out.println("No such method exception in " + configFile + e2);
-		} catch (NullPointerException e3) {
-			System.out.println("Null ptr exception reading " + configFile + e3);
-		}
 
 		super.update(0.0f);
 	}
@@ -334,7 +369,7 @@ public class AwesomeGame extends BaseGame {
 		String server = "localhost";
 		int port = 50001;
 
-		new AwesomeGame(server, port).start();
+		new AwesomeGame().start();
 	}
 
 	public Vector3D getPlayerPosition() {
@@ -343,5 +378,6 @@ public class AwesomeGame extends BaseGame {
 
 	public void setIsConnected(boolean b) {
 		serverConnected = true;
+		System.out.println("SERVER CONNECTED: " + serverConnected);
 	}
 }
