@@ -36,11 +36,13 @@ import sage.event.IEventManager;
 import sage.input.IInputManager;
 import sage.input.InputManager;
 import sage.input.action.IAction;
+import sage.model.loader.OBJLoader;
 import sage.networking.IGameConnection.ProtocolType;
 import sage.renderer.IRenderer;
 import sage.scene.Group;
 import sage.scene.SceneNode;
 import sage.scene.SkyBox;
+import sage.scene.TriMesh;
 import sage.scene.shape.Line;
 import sage.scene.shape.Pyramid;
 import sage.scene.state.RenderState.RenderStateType;
@@ -61,7 +63,7 @@ public class AwesomeGame extends BaseGame {
 	private ICamera camera1;
 	private IRenderer renderer;
 	private IEventManager eventManager;
-	private SceneNode player1;
+//	private SceneNode player1;
 	private ScoreHUD scoreHUD1;
 	private OrbitCameraController cam1Controller;
 	private Util util = new Util();
@@ -70,6 +72,8 @@ public class AwesomeGame extends BaseGame {
 	private String configFile = "config.js";
 	private TerrainBlock terrain;
 	private HillHeightMap heightMap;
+	private TriMesh player1;
+	private TextureState playerTextureState;
 	private static GameServer GameServer;
 	private String serverAddress;
 	private int serverPort;
@@ -166,10 +170,20 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	private void createPlayers() {
-		player1 = new Pyramid("PLAYER1");
+//		player1 = new Pyramid("PLAYER1");
+		OBJLoader loader = new OBJLoader();
+		player1 = loader.loadModel("character.obj");
 		player1.scale(0.2f, 0.2f, 0.2f);
 		player1.translate(0, 1, 0);
 		player1.rotate(45, new Vector3D(0, 1, 0));
+		Texture p1Texture = TextureManager.loadTexture2D("src/images/grass.jpg");
+		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
+		playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
+		playerTextureState.setTexture(p1Texture,0);
+		playerTextureState.setEnabled(true);
+		player1.setRenderState(playerTextureState);
+		player1.updateRenderStates();
+		player1.updateLocalBound();
 		addGameWorldObject(player1);
 		camera1 = new JOGLCamera(renderer);
 		camera1.setPerspectiveFrustum(45, 1, 0.01, 1000);

@@ -10,7 +10,7 @@ import sage.scene.SceneNode;
 
 public class MoveX extends AbstractInputAction {
 	private SceneNode player;
-	private double speed = 0.01;
+	private double speed = 0.000001;
 
 	public MoveX(SceneNode player) {
 		this.player = player;
