@@ -8,14 +8,16 @@ import sage.networking.server.GameConnectionServer;
 import sage.networking.server.IClientInfo;
 
 public class GameServer extends GameConnectionServer<UUID> {
+	
 	public GameServer(int localPort) throws IOException {
 		super(localPort, ProtocolType.TCP);
+		System.out.println("Listening on port: " + localPort);
 	}
 
 	public void acceptClient(IClientInfo ci, Object o) {
 		String message = (String) o;
-
 		String[] messageTokens = message.split(",");
+		
 		if (messageTokens.length > 0) {
 			if (messageTokens[0].compareTo("join") == 0) {
 				UUID clientID = UUID.fromString(messageTokens[1]);
@@ -27,23 +29,33 @@ public class GameServer extends GameConnectionServer<UUID> {
 
 	public void processPacket(Object o, InetAddress senderIP, int sndPort) {
 		String message = (String) o;
-		System.out.println(message);
 		String[] msgTokens = message.split(",");
+		
 		if (msgTokens.length > 0) {
-			if (msgTokens[0].compareTo("bye") == 0) {
-				UUID clientID = UUID.fromString(msgTokens[1]);
-				sendByeMessages(clientID);
-				removeClient(clientID);
-			}
-			if (msgTokens[0].compareTo("create") == 0) {
-				UUID clientID = UUID.fromString(msgTokens[1]);
-				String[] pos = { msgTokens[2], msgTokens[3], msgTokens[4] };
-				sendCreateMessages(clientID, pos);
-				sendWantsDetailsMessages(clientID);
-			}
-			if (msgTokens[0].compareTo("dsfr") == 0) {
-			}
-			if (msgTokens[0].compareTo("move") == 0) {
+			
+			UUID clientID = UUID.fromString(msgTokens[1]);
+			System.out.println(msgTokens[0]);
+
+			switch(msgTokens[0]){
+				case "create":
+					String[] createPos = { msgTokens[2], msgTokens[3], msgTokens[4] };
+					sendCreateMessages(clientID, createPos);
+					break;
+				case "move":
+					String[] movePos = { msgTokens[2], msgTokens[3], msgTokens[4] };
+					sendMoveMessages(clientID, movePos);
+					break;
+				case "dsfr":
+					UUID remoteID = UUID.fromString(msgTokens[2]);
+					String[] detailsPos = { msgTokens[3], msgTokens[4], msgTokens[5] };
+					sendDetailsMessage(clientID, remoteID, detailsPos);
+					break;
+				case "wsds":
+					sendWantsDetailsMessages(clientID);
+					break;
+				case "bye":
+					sendByeMessages(clientID);
+					break;
 			}
 		}
 	}
@@ -64,29 +76,57 @@ public class GameServer extends GameConnectionServer<UUID> {
 	public void sendCreateMessages(UUID clientID, String[] position) {
 		try {
 			String message = new String("create," + clientID.toString());
-			message += "," + position[0];
-			message += "," + position[1];
-			message += "," + position[2];
+			message += "," + Float.parseFloat(position[0]);
+			message += "," + Float.parseFloat(position[1]);
+			message += "," + Float.parseFloat(position[2]);
 			forwardPacketToAll(message, clientID);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void sndDetailsMsg(UUID clientID, UUID remoteId, String[] position) {
-
+	public void sendMoveMessages(UUID clientID, String[] position) {
+		try {
+			String message = new String("move," + clientID.toString());
+			message += "," + Float.parseFloat(position[0]);
+			message += "," + Float.parseFloat(position[1]);
+			message += "," + Float.parseFloat(position[2]);
+			forwardPacketToAll(message, clientID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sendDetailsMessage(UUID clientID, UUID remoteId, String[] position) {
+		try {
+			String message = new String("dsfr," + clientID.toString());
+			message += "," + Float.parseFloat(position[0]);
+			message += "," + Float.parseFloat(position[1]);
+			message += "," + Float.parseFloat(position[2]);
+			sendPacket(message, remoteId);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sendWantsDetailsMessages(UUID clientID) {
-
-	}
-
-	public void sendMoveMessages(UUID clientID, String[] position) {
-
+		try {
+			String message = new String("wsds," + clientID.toString());
+			forwardPacketToAll(message, clientID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sendByeMessages(UUID clientID) {
-
+		try {
+			String message = new String("bye," + clientID.toString());
+			forwardPacketToAll(message, clientID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		removeClient(clientID);
 	}
 
 }

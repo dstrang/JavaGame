@@ -5,7 +5,6 @@ import graphicslib3D.Vector3D;
 import input.ForceQuit;
 import input.MoveX;
 import input.MoveZ;
-import interfaces.ICollectible;
 
 import java.awt.Color;
 import java.io.FileNotFoundException;
@@ -15,7 +14,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -23,9 +21,7 @@ import javax.script.ScriptException;
 import net.java.games.input.Component.Identifier;
 import networking.GameClient;
 import networking.GameServer;
-import cameras.OrbitCameraController;
-import displays.FSDisplaySystem;
-import events.CollectEvent;
+import objects.Avatar;
 import objects.ScoreHUD;
 import sage.app.BaseGame;
 import sage.camera.ICamera;
@@ -44,7 +40,6 @@ import sage.scene.SceneNode;
 import sage.scene.SkyBox;
 import sage.scene.TriMesh;
 import sage.scene.shape.Line;
-import sage.scene.shape.Pyramid;
 import sage.scene.state.RenderState.RenderStateType;
 import sage.scene.state.TextureState;
 import sage.terrain.AbstractHeightMap;
@@ -53,6 +48,9 @@ import sage.terrain.TerrainBlock;
 import sage.texture.Texture;
 import sage.texture.TextureManager;
 import utilities.Util;
+import cameras.OrbitCameraController;
+import displays.FSDisplaySystem;
+import events.CollectEvent;
 
 public class AwesomeGame extends BaseGame {
 	private IDisplaySystem display;
@@ -72,7 +70,7 @@ public class AwesomeGame extends BaseGame {
 	private String configFile = "config.js";
 	private TerrainBlock terrain;
 	private HillHeightMap heightMap;
-	private TriMesh player1;
+	private TriMesh player;
 	private TextureState playerTextureState;
 	private static GameServer GameServer;
 	private String serverAddress;
@@ -170,21 +168,25 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	private void createPlayers() {
-//		player1 = new Pyramid("PLAYER1");
-		OBJLoader loader = new OBJLoader();
-		player1 = loader.loadModel("character.obj");
-		player1.scale(0.2f, 0.2f, 0.2f);
-		player1.translate(0, 1, 0);
-		player1.rotate(45, new Vector3D(0, 1, 0));
-		Texture p1Texture = TextureManager.loadTexture2D("src/images/grass.jpg");
-		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
-		playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
-		playerTextureState.setTexture(p1Texture,0);
-		playerTextureState.setEnabled(true);
-		player1.setRenderState(playerTextureState);
-		player1.updateRenderStates();
-		player1.updateLocalBound();
-		addGameWorldObject(player1);
+
+		
+//		OBJLoader loader = new OBJLoader();
+//		player = loader.loadModel("character.obj");
+//		player.scale(0.2f, 0.2f, 0.2f);
+//		player.rotate(45, new Vector3D(0, 1, 0));
+//		Texture p1Texture = TextureManager.loadTexture2D("src/images/jajalien1_top.jpg");
+//		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
+//		playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
+//		playerTextureState.setTexture(p1Texture,0);
+//		playerTextureState.setEnabled(true);
+//		player.setRenderState(playerTextureState);
+//		player.updateRenderStates();
+//		player.updateLocalBound();
+		
+		player = new Avatar();
+		
+		
+		addGameWorldObject(player);
 		camera1 = new JOGLCamera(renderer);
 		camera1.setPerspectiveFrustum(45, 1, 0.01, 1000);
 		camera1.setViewport(0.0, 1.0, 0.0, 1.0);
@@ -273,10 +275,10 @@ public class AwesomeGame extends BaseGame {
 		String keyboard = inputManager.getKeyboardName();
 		String controller = gamepad != null ? gamepad : keyboard;
 
-		cam1Controller = new OrbitCameraController(camera1, skybox, 225, player1, inputManager, controller);
+		cam1Controller = new OrbitCameraController(camera1, skybox, 225, player, inputManager, controller);
 		
-		IAction moveX = new MoveX(player1);
-		IAction moveZ = new MoveZ(player1);
+		IAction moveX = new MoveX(player);
+		IAction moveZ = new MoveZ(player);
 		IAction forceQuit = new ForceQuit(this);
 		
 		inputManager.associateAction(controller, Identifier.Key.A, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
@@ -290,8 +292,9 @@ public class AwesomeGame extends BaseGame {
 
 	public void update(float elapsedTime) {
 
-		if (thisClient != null)
+		if (thisClient != null){
 			thisClient.processPackets();
+		}
 
 		// for (SceneNode s : getGameWorld()) {
 		// if (s instanceof ICollectible) {
@@ -306,20 +309,22 @@ public class AwesomeGame extends BaseGame {
 		// }
 		// }
 
-		if (terrain.getWorldBound().intersects(player1.getWorldBound())) {
-			Point3D avLoc = new Point3D(player1.getLocalTranslation().getCol(3));
+		if (terrain.getWorldBound().intersects(player.getWorldBound())) {
+			Point3D avLoc = new Point3D(player.getLocalTranslation().getCol(3));
 			float x = (float) avLoc.getX();
 			float z = (float) avLoc.getZ();
 			float terHeight = terrain.getHeight(x, z);
 			float desiredHeight = terHeight + (float) terrain.getOrigin().getY() + 0.5f;
 			if (!Float.isNaN(desiredHeight)) {
-				player1.getLocalTranslation().setElementAt(1, 3, desiredHeight);
+				player.getLocalTranslation().setElementAt(1, 3, desiredHeight);
 			}
 		}
 
 		scoreHUD1.updateTime(elapsedTime);
 
 		cam1Controller.update(elapsedTime);
+		
+		
 		super.update(elapsedTime);
 	}
 
@@ -387,11 +392,23 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	public Vector3D getPlayerPosition() {
-		return player1.getLocalTranslation().getCol(3);
+		Vector3D position = player.getLocalTranslation().getCol(3);
+		return new Vector3D(position.getX(), position.getY(), position.getZ());
 	}
 
 	public void setIsConnected(boolean b) {
-		serverConnected = true;
+		serverConnected = b;
 		System.out.println("SERVER CONNECTED: " + serverConnected);
+	}
+
+	public Avatar addGhostToGame(float x, float y, float z) {
+		Avatar ghost = new Avatar();
+		ghost.translate(x, y, z);
+		addGameWorldObject(ghost);
+		return ghost;
+	}
+
+	public void removeGhostFromGame(Avatar ghost) {
+		removeGameWorldObject(ghost);
 	}
 }
