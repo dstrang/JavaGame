@@ -150,7 +150,6 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	protected void shutdown() {
-		super.shutdown();
 		if (thisClient != null) {
 			thisClient.sendByeMessage();
 			try {
@@ -183,14 +182,32 @@ public class AwesomeGame extends BaseGame {
 //		player.updateRenderStates();
 //		player.updateLocalBound();
 		
-		player = new Avatar();
+//		player = new Avatar();
 		
+		player = createAvatar("src/images/jajalien1_top.jpg");
 		
 		addGameWorldObject(player);
 		camera1 = new JOGLCamera(renderer);
 		camera1.setPerspectiveFrustum(45, 1, 0.01, 1000);
 		camera1.setViewport(0.0, 1.0, 0.0, 1.0);
 		createPlayerHUDs();
+	}
+	
+	private TriMesh createAvatar(String textureFile){
+		OBJLoader loader = new OBJLoader();
+		TriMesh model = loader.loadModel("character.obj");
+		model.scale(0.2f, 0.2f, 0.2f);
+		model.rotate(45, new Vector3D(0, 1, 0));
+		Texture p1Texture = TextureManager.loadTexture2D(textureFile);
+		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
+		TextureState modelTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
+		modelTextureState.setTexture(p1Texture,0);
+		modelTextureState.setEnabled(true);
+		model.setRenderState(modelTextureState);
+		model.updateRenderStates();
+		model.updateLocalBound();
+		
+		return model;
 	}
 
 	private void createPlayerHUDs() {
@@ -293,6 +310,7 @@ public class AwesomeGame extends BaseGame {
 	public void update(float elapsedTime) {
 
 		if (thisClient != null){
+			thisClient.sendMoveMessage(getPlayerPosition());
 			thisClient.processPackets();
 		}
 
@@ -392,7 +410,7 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	public Vector3D getPlayerPosition() {
-		Vector3D position = player.getLocalTranslation().getCol(3);
+		Vector3D position = player.getWorldTranslation().getCol(3);
 		return new Vector3D(position.getX(), position.getY(), position.getZ());
 	}
 
@@ -401,14 +419,14 @@ public class AwesomeGame extends BaseGame {
 		System.out.println("SERVER CONNECTED: " + serverConnected);
 	}
 
-	public Avatar addGhostToGame(float x, float y, float z) {
-		Avatar ghost = new Avatar();
+	public TriMesh addGhostToGame(float x, float y, float z) {
+		TriMesh ghost = createAvatar("src/images/jajalien1_left.jpg");
 		ghost.translate(x, y, z);
 		addGameWorldObject(ghost);
 		return ghost;
 	}
 
-	public void removeGhostFromGame(Avatar ghost) {
+	public void removeGhostFromGame(TriMesh ghost) {
 		removeGameWorldObject(ghost);
 	}
 }

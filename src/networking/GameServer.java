@@ -34,7 +34,6 @@ public class GameServer extends GameConnectionServer<UUID> {
 		if (msgTokens.length > 0) {
 			
 			UUID clientID = UUID.fromString(msgTokens[1]);
-			System.out.println(msgTokens[0]);
 
 			switch(msgTokens[0]){
 				case "create":

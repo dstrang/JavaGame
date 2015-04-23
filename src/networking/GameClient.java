@@ -11,25 +11,24 @@ import java.util.UUID;
 
 import objects.Avatar;
 import sage.networking.client.GameConnectionClient;
+import sage.scene.TriMesh;
 
 public class GameClient extends GameConnectionClient {
 	private AwesomeGame game;
 	private UUID id;
-	private HashMap<UUID,Avatar> ghostAvatars;
+	private HashMap<UUID, TriMesh> ghostAvatars;
 
 	public GameClient(InetAddress remAddr, int remPort, ProtocolType pType, AwesomeGame game) throws IOException {
 		super(remAddr, remPort, pType);
 		this.game = game;
 		this.id = UUID.randomUUID();
-		this.ghostAvatars = new HashMap<UUID,Avatar>();
+		this.ghostAvatars = new HashMap<UUID,TriMesh>();
 	}
 
 	protected void processPacket(Object o) {
 		String message = (String) o;
 		String[] msgTokens = message.split(",");
-		
-		System.out.println(msgTokens[0]);
-		
+				
 		if(msgTokens.length > 0){
 			
 			switch(msgTokens[0]){
@@ -64,13 +63,13 @@ public class GameClient extends GameConnectionClient {
 		float y = Float.parseFloat(msgTokens[3]);
 		float z = Float.parseFloat(msgTokens[4]);
 		if(!ghostAvatars.containsKey(ghostID)){
-			Avatar ghost = game.addGhostToGame(x, y, z);
+			TriMesh ghost = game.addGhostToGame(x, y, z);
 			ghostAvatars.put(ghostID, ghost);
 		}
 	}
 
 	private void processMove(String[] msgTokens) {
-		Avatar ghost = ghostAvatars.get(UUID.fromString(msgTokens[1]));
+		TriMesh ghost = ghostAvatars.get(UUID.fromString(msgTokens[1]));
 		float x = Float.parseFloat(msgTokens[2]);
 		float y = Float.parseFloat(msgTokens[3]);
 		float z = Float.parseFloat(msgTokens[4]);
@@ -103,12 +102,12 @@ public class GameClient extends GameConnectionClient {
 		float x = Float.parseFloat(position[0]);
 		float y = Float.parseFloat(position[1]);
 		float z = Float.parseFloat(position[2]);
-		Avatar ghost = game.addGhostToGame(x, y, z);
+		TriMesh ghost = game.addGhostToGame(x, y, z);
 		ghostAvatars.put(ghostID, ghost);
 	}
 
 	private void removeGhostAvatar(UUID ghostID) {
-		Avatar ghost = ghostAvatars.get(ghostID);
+		TriMesh ghost = ghostAvatars.get(ghostID);
 		if(ghost != null){
 			game.removeGhostFromGame(ghost);
 		}
