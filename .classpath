@@ -17,5 +17,6 @@
 	<classpathentry kind="lib" path="C:/javagaming/ode4j/core-0.3.0.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/vecmath/vecmath.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/sage/sage.jar"/>
+	<classpathentry kind="lib" path="C:/javagaming/jbullet/jbullet.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

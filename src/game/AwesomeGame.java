@@ -3,6 +3,7 @@ package game;
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
 import input.ForceQuit;
+import input.Jump;
 import input.MoveX;
 import input.MoveZ;
 
@@ -23,6 +24,7 @@ import networking.GameClient;
 import networking.GameServer;
 import objects.Avatar;
 import objects.ScoreHUD;
+import physics.PhysicsManager;
 import sage.app.BaseGame;
 import sage.camera.ICamera;
 import sage.camera.JOGLCamera;
@@ -34,6 +36,7 @@ import sage.input.InputManager;
 import sage.input.action.IAction;
 import sage.model.loader.OBJLoader;
 import sage.networking.IGameConnection.ProtocolType;
+import sage.physics.IPhysicsObject;
 import sage.renderer.IRenderer;
 import sage.scene.Group;
 import sage.scene.SceneNode;
@@ -70,7 +73,10 @@ public class AwesomeGame extends BaseGame {
 	private String configFile = "config.js";
 	private TerrainBlock terrain;
 	private HillHeightMap heightMap;
-	private TriMesh player;
+	
+//	private TriMesh player;
+	private Avatar player;
+	
 	private TextureState playerTextureState;
 	private static GameServer GameServer;
 	private String serverAddress;
@@ -78,6 +84,9 @@ public class AwesomeGame extends BaseGame {
 	private ProtocolType serverProtocol;
 	private GameClient thisClient;
 	private boolean serverConnected;
+	
+	private PhysicsManager physicsManager;
+	private IPhysicsObject ground;
 
 	public AwesomeGame() {
 		super();
@@ -107,6 +116,7 @@ public class AwesomeGame extends BaseGame {
 		createPlayers();
 		initInput();
 		initConfig();
+		initPhysics();
 		
 		try {
 			thisClient = new GameClient(InetAddress.getByName(serverAddress), serverPort, serverProtocol, this);
@@ -119,6 +129,20 @@ public class AwesomeGame extends BaseGame {
 		if (thisClient != null) {
 			thisClient.sendJoinMessage();
 		}
+	}
+
+	private void initPhysics() {
+		physicsManager = new PhysicsManager(player);
+		
+		// Populate physics objects if the physics engine has been intialized.
+		if (physicsManager.isPhysicsEngineEnabled()) {
+			ground = physicsManager.bindGroundPhysics(terrain);
+			player.setPhysicsObject(physicsManager.bindPhysicsProperty(player, 1.0f));
+		}
+	}
+	
+	public PhysicsManager getPhysicsManager(){
+		return physicsManager;
 	}
 
 	private IDisplaySystem createDisplaySystem() {
@@ -169,22 +193,11 @@ public class AwesomeGame extends BaseGame {
 	private void createPlayers() {
 
 		
-//		OBJLoader loader = new OBJLoader();
-//		player = loader.loadModel("character.obj");
-//		player.scale(0.2f, 0.2f, 0.2f);
-//		player.rotate(45, new Vector3D(0, 1, 0));
-//		Texture p1Texture = TextureManager.loadTexture2D("src/images/jajalien1_top.jpg");
-//		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
-//		playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
-//		playerTextureState.setTexture(p1Texture,0);
-//		playerTextureState.setEnabled(true);
-//		player.setRenderState(playerTextureState);
-//		player.updateRenderStates();
-//		player.updateLocalBound();
+
 		
-//		player = new Avatar();
+		player = new Avatar();
 		
-		player = createAvatar("src/images/jajalien1_top.jpg");
+//		player = createAvatar("src/images/jajalien1_top.jpg");
 		
 		addGameWorldObject(player);
 		camera1 = new JOGLCamera(renderer);
@@ -297,12 +310,14 @@ public class AwesomeGame extends BaseGame {
 		IAction moveX = new MoveX(player);
 		IAction moveZ = new MoveZ(player);
 		IAction forceQuit = new ForceQuit(this);
+		IAction jump = new Jump(player);
 		
 		inputManager.associateAction(controller, Identifier.Key.A, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(controller, Identifier.Key.D, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(controller, Identifier.Key.W, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(controller, Identifier.Key.S, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE, forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(keyboard, Identifier.Key.SPACE, jump, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 
 		super.update(0.0f);
 	}
@@ -313,6 +328,9 @@ public class AwesomeGame extends BaseGame {
 			thisClient.sendMoveMessage(getPlayerPosition());
 			thisClient.processPackets();
 		}
+		
+		physicsManager.updatePhysicsState(getGameWorld());
+
 
 		// for (SceneNode s : getGameWorld()) {
 		// if (s instanceof ICollectible) {

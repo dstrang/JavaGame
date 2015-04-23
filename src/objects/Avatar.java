@@ -6,6 +6,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.UUID;
 
+import sage.physics.IPhysicsObject;
 import sage.scene.TriMesh;
 
 public class Avatar extends TriMesh{
@@ -13,6 +14,8 @@ public class Avatar extends TriMesh{
 	private static float[] cl = new float[] {1,0,0,1,  0,1,0,1,  0,0,1,1,  1,1,0,1,  1,0,1,1};
 	private static int[] triangles = new int[] {0,1,2,  0,2,3,  0,3,4,  0,4,1,  1,4,2,  4,3,2};
 	private UUID id;
+	private boolean isJumping;
+	private IPhysicsObject physicsObject;
 	
 	public Avatar()
 	{ 
@@ -29,5 +32,21 @@ public class Avatar extends TriMesh{
 	
 	public UUID getUUID(){
 		return id;
+	}
+	
+	public boolean isJumping() {
+		return isJumping;
+	}
+	
+	public void setJumping(boolean isJumping) {
+		this.isJumping = isJumping;
+	}
+
+	public IPhysicsObject getPhysicsObject() {
+		return physicsObject;
+	}
+
+	public void setPhysicsObject(IPhysicsObject physicsObject) {
+		this.physicsObject = physicsObject;
 	}
 }
