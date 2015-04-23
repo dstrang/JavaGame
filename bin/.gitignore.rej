@@ -1,0 +1,4 @@
+diff a/bin/.gitignore b/bin/.gitignore	(rejected hunks)
+@@ -0,0 +1,2 @@
++/game/
++/input/
