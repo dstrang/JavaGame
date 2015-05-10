@@ -43,10 +43,12 @@ import sage.scene.SceneNode;
 import sage.scene.SkyBox;
 import sage.scene.TriMesh;
 import sage.scene.shape.Line;
+import sage.scene.shape.Rectangle;
 import sage.scene.state.RenderState.RenderStateType;
 import sage.scene.state.TextureState;
 import sage.terrain.AbstractHeightMap;
 import sage.terrain.HillHeightMap;
+import sage.terrain.ImageBasedHeightMap;
 import sage.terrain.TerrainBlock;
 import sage.texture.Texture;
 import sage.texture.TextureManager;
@@ -72,7 +74,7 @@ public class AwesomeGame extends BaseGame {
 	private Group treasures;
 	private String configFile = "config.js";
 	private TerrainBlock terrain;
-	private HillHeightMap heightMap;
+//	private HillHeightMap heightMap;
 	
 //	private TriMesh player;
 	private Avatar player;
@@ -231,13 +233,14 @@ public class AwesomeGame extends BaseGame {
 	private void createScene() {
 		// initialize skybox
 		skybox = new SkyBox("Skybox", 20.0f, 20.0f, 20.0f);
-
+		
 		// load textures
-		Texture northTexture = TextureManager.loadTexture2D("src/images/jajalien1_front.jpg");
-		Texture southTexture = TextureManager.loadTexture2D("src/images/jajalien1_back.jpg");
-		Texture eastTexture = TextureManager.loadTexture2D("src/images/jajalien1_right.jpg");
-		Texture westTexture = TextureManager.loadTexture2D("src/images/jajalien1_left.jpg");
-		Texture upTexture = TextureManager.loadTexture2D("src/images/jajalien1_top.jpg");
+		Texture northTexture = TextureManager.loadTexture2D("src/images/ocean_front.png");
+		Texture southTexture = TextureManager.loadTexture2D("src/images/ocean_back.png");
+		Texture eastTexture = TextureManager.loadTexture2D("src/images/ocean_right.png");
+		Texture westTexture = TextureManager.loadTexture2D("src/images/ocean_left.png");
+		Texture upTexture = TextureManager.loadTexture2D("src/images/ocean_up.png");
+		Texture downTexture = TextureManager.loadTexture2D("src/images/ocean_down.png");
 
 		// attach textures to skybox
 		skybox.setTexture(SkyBox.Face.North, northTexture);
@@ -245,6 +248,7 @@ public class AwesomeGame extends BaseGame {
 		skybox.setTexture(SkyBox.Face.East, eastTexture);
 		skybox.setTexture(SkyBox.Face.West, westTexture);
 		skybox.setTexture(SkyBox.Face.Up, upTexture);
+		skybox.setTexture(SkyBox.Face.Down, downTexture);
 		addGameWorldObject(skybox);
 		eventManager.addListener(scoreHUD1, CollectEvent.class);
 
@@ -260,10 +264,9 @@ public class AwesomeGame extends BaseGame {
 		addGameWorldObject(yAxis);
 		addGameWorldObject(zAxis);
 
-		// ImageBasedHeightMap heightMap = new
-		// ImageBasedHeightMap("./src/images/heightmap.jpg");
-		heightMap = new HillHeightMap(129, 2000, 5.0f, 20.0f, (byte) 2, 12345);
-		heightMap.setHeightScale(0.1f);
+		ImageBasedHeightMap heightMap = new ImageBasedHeightMap("./src/images/island.jpg");
+//		HillHeightMap heightMap = new HillHeightMap(100, 10, 20.0f, 21.0f, (byte) 1);
+//		heightMap.setHeightScale(1f);
 		terrain = createTerrainBlock(heightMap);
 		TextureState grassState;
 		Texture grassTexture = TextureManager.loadTexture2D("src/images/grass.jpg");
@@ -275,21 +278,20 @@ public class AwesomeGame extends BaseGame {
 		grassState.setEnabled(true);
 		terrain.setRenderState(grassState);
 
-		// add terrain
-		// float [] heightMap = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-		// 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-		// terrain = new TerrainBlock("Terrain", 4, new Vector3D(1,1,1),
-		// heightMap, heightMap);
-
-		// terrain.setDetailTexture(1, 1);
-
-		// terrain.setTexture(eastTexture);
-
 		addGameWorldObject(terrain);
+		
+		// add water
+		int waterSize = 100;
+		Rectangle water = new Rectangle(waterSize, waterSize);
+		water.rotate(90, new Vector3D(1, 0, 0));
+		water.translate(waterSize/2, 0.5f, waterSize/2);
+		Texture waterTexture = TextureManager.loadTexture2D("src/images/ocean_down.png");
+		water.setTexture(waterTexture);
+		addGameWorldObject(water);
 	}
 
 	private TerrainBlock createTerrainBlock(AbstractHeightMap heightMap) {
-		float heightScale = .005f;
+		float heightScale = .010f;
 		Vector3D terrainScale = new Vector3D(.2, heightScale, .2);
 		int terrainSize = heightMap.getSize();
 		float cornerHeight = heightMap.getTrueHeightAtPoint(0, 0) * heightScale;
@@ -350,7 +352,7 @@ public class AwesomeGame extends BaseGame {
 			float x = (float) avLoc.getX();
 			float z = (float) avLoc.getZ();
 			float terHeight = terrain.getHeight(x, z);
-			float desiredHeight = terHeight + (float) terrain.getOrigin().getY() + 0.5f;
+			float desiredHeight = terHeight + (float) terrain.getOrigin().getY() + player.getSize();
 			if (!Float.isNaN(desiredHeight)) {
 				player.getLocalTranslation().setElementAt(1, 3, desiredHeight);
 			}

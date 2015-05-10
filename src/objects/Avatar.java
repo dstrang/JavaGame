@@ -16,6 +16,7 @@ public class Avatar extends TriMesh{
 	private UUID id;
 	private boolean isJumping;
 	private IPhysicsObject physicsObject;
+	private float size = 0.1f;
 	
 	public Avatar()
 	{ 
@@ -26,8 +27,9 @@ public class Avatar extends TriMesh{
 		this.setVertexBuffer(vertBuf);
 		this.setColorBuffer(colorBuf);
 		this.setIndexBuffer(triangleBuf);
-		this.scale(0.2f, 0.2f, 0.2f);
+		this.scale(size, size, size);
 		this.rotate(45, new Vector3D(0,1,0));
+		this.translate(25, 0, 25);
 	}
 	
 	public UUID getUUID(){
@@ -48,5 +50,9 @@ public class Avatar extends TriMesh{
 
 	public void setPhysicsObject(IPhysicsObject physicsObject) {
 		this.physicsObject = physicsObject;
+	}
+	
+	public float getSize(){
+		return this.size;
 	}
 }
