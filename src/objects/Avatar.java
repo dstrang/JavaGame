@@ -1,5 +1,6 @@
 package objects;
 
+import graphicslib3D.Matrix3D;
 import graphicslib3D.Vector3D;
 
 import java.nio.FloatBuffer;
@@ -29,9 +30,15 @@ public class Avatar extends TriMesh{
 		this.setIndexBuffer(triangleBuf);
 		this.scale(size, size, size);
 		this.rotate(45, new Vector3D(0,1,0));
-		this.translate(25, 0, 25);
+		this.respawn();
 	}
 	
+	public void respawn() {
+		Matrix3D origin = new Matrix3D();
+		origin.translate(25, 0.5f, 25);
+		this.setLocalTranslation(origin);
+	}
+
 	public UUID getUUID(){
 		return id;
 	}

@@ -18,5 +18,6 @@
 	<classpathentry kind="lib" path="C:/javagaming/vecmath/vecmath.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/sage/sage.jar"/>
 	<classpathentry kind="lib" path="C:/javagaming/jbullet/jbullet.jar"/>
+	<classpathentry kind="lib" path="C:/Users/David/projects/sage/dist/jogl/joal.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -26,6 +26,12 @@ import objects.Avatar;
 import objects.ScoreHUD;
 import physics.PhysicsManager;
 import sage.app.BaseGame;
+import sage.audio.AudioManagerFactory;
+import sage.audio.AudioResource;
+import sage.audio.AudioResourceType;
+import sage.audio.IAudioManager;
+import sage.audio.Sound;
+import sage.audio.SoundType;
 import sage.camera.ICamera;
 import sage.camera.JOGLCamera;
 import sage.display.IDisplaySystem;
@@ -47,7 +53,6 @@ import sage.scene.shape.Rectangle;
 import sage.scene.state.RenderState.RenderStateType;
 import sage.scene.state.TextureState;
 import sage.terrain.AbstractHeightMap;
-import sage.terrain.HillHeightMap;
 import sage.terrain.ImageBasedHeightMap;
 import sage.terrain.TerrainBlock;
 import sage.texture.Texture;
@@ -89,6 +94,16 @@ public class AwesomeGame extends BaseGame {
 	
 	private PhysicsManager physicsManager;
 	private IPhysicsObject ground;
+	
+	private boolean singlePlayer = true;
+	
+	// audio
+	private IAudioManager audioManager;
+	private Sound waterSound, backgroundMusic;
+	private AudioResource resource1, resource2;
+
+	
+	private Rectangle waterPlane;
 
 	public AwesomeGame() {
 		super();
@@ -119,18 +134,47 @@ public class AwesomeGame extends BaseGame {
 		initInput();
 		initConfig();
 		initPhysics();
+		initAudio();
 		
-		try {
-			thisClient = new GameClient(InetAddress.getByName(serverAddress), serverPort, serverProtocol, this);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		if(!singlePlayer){
+			try {
+				thisClient = new GameClient(InetAddress.getByName(serverAddress), serverPort, serverProtocol, this);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
-		if (thisClient != null) {
-			thisClient.sendJoinMessage();
+			if (thisClient != null) {
+				thisClient.sendJoinMessage();
+			}	
 		}
+	}
+	
+	private void initAudio(){
+		audioManager = AudioManagerFactory.createAudioManager("sage.audio.joal.JOALAudioManager");
+		
+		if(!audioManager.initialize()){
+			System.out.println("Audio Manager failed to initialize");
+		}
+		
+		resource1 = audioManager.createAudioResource("src/sounds/Background.wav", AudioResourceType.AUDIO_SAMPLE);
+		resource2 = audioManager.createAudioResource("src/sounds/Ocean.wav", AudioResourceType.AUDIO_SAMPLE);
+		
+		backgroundMusic = new Sound(resource1, SoundType.SOUND_MUSIC, 30, true);
+		waterSound = new Sound(resource2, SoundType.SOUND_EFFECT, 60, true);
+		
+		backgroundMusic.initialize(audioManager);
+		waterSound.initialize(audioManager);
+		
+		waterSound.setMaxDistance(1.0f);
+		waterSound.setMinDistance(0.5f);
+		waterSound.setRollOff(0.75f);
+		
+		waterSound.setLocation(new Point3D(0, 0, 0));
+				
+//		backgroundMusic.play();
+		waterSound.play();
 	}
 
 	private void initPhysics() {
@@ -184,6 +228,14 @@ public class AwesomeGame extends BaseGame {
 				e.printStackTrace();
 			}
 		}
+		
+		// release audio
+		backgroundMusic.release(audioManager);
+		waterSound.release(audioManager);
+		resource1.unload();
+		resource2.unload();
+		audioManager.shutdown();
+		
 		display.close();
 	}
 
@@ -282,12 +334,12 @@ public class AwesomeGame extends BaseGame {
 		
 		// add water
 		int waterSize = 100;
-		Rectangle water = new Rectangle(waterSize, waterSize);
-		water.rotate(90, new Vector3D(1, 0, 0));
-		water.translate(waterSize/2, 0.5f, waterSize/2);
+		waterPlane = new Rectangle(waterSize, waterSize);
+		waterPlane.rotate(90, new Vector3D(1, 0, 0));
+		waterPlane.translate(waterSize/2, 0.5f, waterSize/2);
 		Texture waterTexture = TextureManager.loadTexture2D("src/images/ocean_down.png");
-		water.setTexture(waterTexture);
-		addGameWorldObject(water);
+		waterPlane.setTexture(waterTexture);
+		addGameWorldObject(waterPlane);
 	}
 
 	private TerrainBlock createTerrainBlock(AbstractHeightMap heightMap) {
@@ -356,6 +408,11 @@ public class AwesomeGame extends BaseGame {
 			if (!Float.isNaN(desiredHeight)) {
 				player.getLocalTranslation().setElementAt(1, 3, desiredHeight);
 			}
+		}
+		
+		Vector3D playerPosition = getPlayerPosition();
+		if(playerPosition.getY() < 0.5f){
+			player.respawn();
 		}
 
 		scoreHUD1.updateTime(elapsedTime);
