@@ -13,14 +13,14 @@ public class PhysicsManager {
 	
 	private IPhysicsEngine	physicsEngine;
 	
-	private String			ENGINE	= "sage.physics.JBullet.JBulletPhysicsEngine";
+	private String			engine	= "sage.physics.JBullet.JBulletPhysicsEngine";
 	private boolean			physicsEngineEnabled = true; 
 	
 	private boolean			pEnabled = true;
 	
 	public PhysicsManager(SceneNode localPlayer) {
 		if(physicsEngineEnabled){
-			physicsEngine = PhysicsEngineFactory.createPhysicsEngine(ENGINE);
+			physicsEngine = PhysicsEngineFactory.createPhysicsEngine(engine);
 			physicsEngine.initSystem();
 			float[] gravity = { 0, -4f, 0 };
 			physicsEngine.setGravity(gravity);
