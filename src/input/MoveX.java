@@ -6,13 +6,14 @@ import graphicslib3D.Vector3D;
 import net.java.games.input.Event;
 import sage.camera.ICamera;
 import sage.input.action.AbstractInputAction;
+import sage.scene.Model3DTriMesh;
 import sage.scene.SceneNode;
 
 public class MoveX extends AbstractInputAction {
-	private SceneNode player;
+	private Model3DTriMesh player;
 	private double speed = 0.01;
 
-	public MoveX(SceneNode player) {
+	public MoveX(Model3DTriMesh player) {
 		this.player = player;
 	}
 
@@ -29,7 +30,10 @@ public class MoveX extends AbstractInputAction {
 			direction.scale(speed * -1);
 			break;
 		}
+
 		
 		player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
+		if (!player.isAnimating())
+			player.startAnimation("walk");
 	}
 }

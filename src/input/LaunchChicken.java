@@ -11,16 +11,17 @@ import sage.input.action.AbstractInputAction;
 import sage.model.loader.OBJLoader;
 import sage.physics.IPhysicsEngine;
 import sage.physics.IPhysicsObject;
+import sage.scene.Model3DTriMesh;
 import sage.scene.SceneNode;
 import sage.scene.TriMesh;
 
 public class LaunchChicken extends AbstractInputAction{
-	private Avatar player;
+	private Model3DTriMesh player;
 	private AwesomeGame game;
 	private IPhysicsEngine physicsEngine;
 	private double speed = 0.015;
  
-	public LaunchChicken(AwesomeGame awesomeGame, Avatar player, IPhysicsEngine physicsEngine) {
+	public LaunchChicken(AwesomeGame awesomeGame, Model3DTriMesh player, IPhysicsEngine physicsEngine) {
 		this.game = awesomeGame;
 		this.player = player;
 		this.physicsEngine = physicsEngine;
