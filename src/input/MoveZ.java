@@ -28,13 +28,26 @@ public class MoveZ extends AbstractInputAction{
 		switch (e.getComponent().toString()) {
 		case "W":
 			direction.scale(speed);
+			player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
 			break;
 		case "S":
-			direction.scale(speed * -1);
+			direction.scale(-speed);
+			player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
+			break;
+		case "Y Axis":
+			if (e.getValue() < -0.3)
+			{
+				direction.scale(speed);	
+				player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
+			}
+			else if (e.getValue() > 0.3)
+			{
+				direction.scale(-speed);	
+				player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
+			}
 			break;
 		}
-		
-		player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
+
 		if (!player.isAnimating())
 			player.startAnimation("walk");
 	}

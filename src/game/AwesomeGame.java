@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -92,6 +93,7 @@ public class AwesomeGame extends BaseGame {
 	// private HillHeightMap heightMap;
 
 	private Model3DTriMesh player;
+	private Vector3D prevPosition = new Vector3D(0, 0, 0);
 	private Group model;
 	// private Avatar player;
 
@@ -332,8 +334,8 @@ public class AwesomeGame extends BaseGame {
 		try {
 			model = loader.loadModel("character.mesh.xml", "grass_mat.material", "character.skeleton.xml");
 			model.updateGeometricState(0, true);
-			java.util.Iterator<SceneNode> modelIterator = model.iterator();
-			character = (Model3DTriMesh) modelIterator.next();
+			Iterator<SceneNode> modelIterator = model.iterator();
+			character = (Model3DTriMesh)modelIterator.next();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -481,8 +483,15 @@ public class AwesomeGame extends BaseGame {
 		inputManager.associateAction(controller, Identifier.Key.D, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(controller, Identifier.Key.W, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(controller, Identifier.Key.S, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(controller, Identifier.Axis.X, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(controller, Identifier.Axis.Y, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE, forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(keyboard, Identifier.Key.SPACE, launchChicken, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+		if (gamepad != null)
+		{
+			inputManager.associateAction(gamepad, Identifier.Axis.X, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+			inputManager.associateAction(gamepad, Identifier.Axis.Y, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		}
 
 		super.update(0.0f);
 	}
@@ -539,6 +548,9 @@ public class AwesomeGame extends BaseGame {
 		if (playerPosition.getY() < 0.5f) {
 //			player.respawn();
 		}
+		if (playerPosition.equals(prevPosition))
+			player.stopAnimation();
+		prevPosition = playerPosition;
 
 		scoreHUD1.updateTime(elapsedTime);
 

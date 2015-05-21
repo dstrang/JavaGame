@@ -25,14 +25,26 @@ public class MoveX extends AbstractInputAction {
 		switch (e.getComponent().toString()) {
 		case "A":
 			direction.scale(speed);
+			player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
 			break;
 		case "D":
-			direction.scale(speed * -1);
+			direction.scale(-speed);
+			player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
+			break;
+		case "X Axis":
+			if (e.getValue() < -0.3)
+			{
+				direction.scale(speed);
+				player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
+			}
+			else if (e.getValue() > 0.3)
+			{
+				direction.scale(-speed);
+				player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
+			}
 			break;
 		}
 
-		
-		player.translate((float)direction.getX(), (float)direction.getY(), (float)direction.getZ());
 		if (!player.isAnimating())
 			player.startAnimation("walk");
 	}

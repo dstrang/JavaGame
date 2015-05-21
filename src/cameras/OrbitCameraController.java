@@ -77,6 +77,7 @@ public class OrbitCameraController {
 		im.associateAction(cn, Identifier.Key.UP, zoomAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Key.DOWN, zoomAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Key.T, toggleAction, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+		im.associateAction(cn, Identifier.Button._0, toggleAction, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 	}
 
 	private class OrbitAroundAction extends AbstractInputAction {
@@ -100,8 +101,16 @@ public class OrbitCameraController {
 			case "X Rotation":
 				if (e.getValue() < -0.2) {
 					rotAmount = turnSpeed * time;
+					if (toggle) 
+					{
+						target.rotate(rotAmount, worldUpVec);
+					}
 				} else if (e.getValue() > 0.2) {
 					rotAmount = turnSpeed * time * -1;
+					if (toggle) 
+					{
+						target.rotate(rotAmount, worldUpVec);
+					}
 				}
 				break;
 			}
