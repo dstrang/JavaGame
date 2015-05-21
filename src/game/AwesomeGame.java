@@ -364,14 +364,14 @@ public class AwesomeGame extends BaseGame {
 		character.translate(25, 0.5f, 25);
 		character.rotate(45, new Vector3D(0, 1, 0));
 
-		Texture p1Texture = TextureManager.loadTexture2D("src/images/jajalien1_top.jpg");
+		Texture p1Texture = TextureManager.loadTexture2D("src/images/rock.jpg");
 		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
-		playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
+		playerTextureState = (TextureState) display.getRenderer().createRenderState(RenderStateType.Texture);
 		playerTextureState.setTexture(p1Texture, 0);
 		playerTextureState.setEnabled(true);
-		model.setRenderState(playerTextureState);
-		model.updateRenderStates();
-		model.updateLocalBound();
+		character.setRenderState(playerTextureState);
+		character.updateRenderStates();
+		character.updateLocalBound();
 
 		return character;
 	}
