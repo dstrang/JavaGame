@@ -231,23 +231,23 @@ public class AwesomeGame extends BaseGame {
 		OBJLoader loader = new OBJLoader();
 		final TriMesh chicken = loader.loadModel("chicken.obj");
 		chicken.scale(0.02f, 0.02f, 0.02f);
+		chicken.translate((float)playerLocation.getX(), (float)playerLocation.getY(), (float)playerLocation.getZ());
 		chicken.updateRenderStates();
 		chicken.updateLocalBound();
-		chicken.translate((float)playerLocation.getX(), (float)playerLocation.getY(), (float)playerLocation.getZ());
 		addGameWorldObject(chicken);
 		
-//		float mass = 1.0f;
-//		IPhysicsObject chickenP;
-//		chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getWorldTransform().getValues(), 0.0f);
-//		chickenP.setBounciness(0.9f);
-//		float[] vel = {0, 1.0f, 0.5f};
-//		chickenP.setLinearVelocity(vel);
-//		chickenP.setSleepThresholds(0.5f, 0.5f);
-//		chicken.setPhysicsObject(chickenP);
+		float mass = 1.0f;
+		IPhysicsObject chickenP;
+		chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getLocalTranslation().getValues(), 0.0f);
+		chickenP.setBounciness(0.9f);
+		float[] vel = {0, 1.0f, 0.5f};
+		chickenP.setLinearVelocity(vel);
+		chickenP.setSleepThresholds(0.5f, 0.5f);
+		chicken.setPhysicsObject(chickenP);
 		
 		new Timer().schedule(new TimerTask(){
 		    public void run(){
-				removeGameWorldObject(chicken);
+//				removeGameWorldObject(chicken);
 		    }
 		}, 2000 );
 		
