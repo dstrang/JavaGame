@@ -31,7 +31,7 @@ public class OrbitCameraController {
 		this.skybox = skybox;
 		this.target = target;
 		worldUpVec = new Vector3D(0, 1, 0);
-		cameraDistanceFromTarget = 2.0f;
+		cameraDistanceFromTarget = 5.0f;
 		cameraAzimuth = azimuth; // start from BEHIND and ABOVE the target
 		cameraElevation = 20.0f; // elevation is in degrees
 		update(0.0f); // initialize camera state
@@ -134,8 +134,8 @@ public class OrbitCameraController {
 			cameraDistanceFromTarget += zoomAmount;
 			if(cameraDistanceFromTarget < 1.0){
 				cameraDistanceFromTarget = 1.0f;
-			}else if(cameraDistanceFromTarget > 3.0){
-				cameraDistanceFromTarget = 3.0f;
+			}else if(cameraDistanceFromTarget > 5.0){
+				cameraDistanceFromTarget = 5.0f;
 			}
 		}
 	}

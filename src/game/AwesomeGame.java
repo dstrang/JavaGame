@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,7 +28,6 @@ import net.java.games.input.Component.Identifier;
 import networking.GameClient;
 import networking.GameServer;
 import objects.Avatar;
-import objects.Chicken;
 import objects.ScoreHUD;
 import sage.app.BaseGame;
 import sage.audio.AudioManagerFactory;
@@ -56,6 +56,7 @@ import sage.scene.Model3DTriMesh;
 import sage.scene.SceneNode;
 import sage.scene.SkyBox;
 import sage.scene.TriMesh;
+import sage.scene.shape.Cube;
 import sage.scene.shape.Line;
 import sage.scene.shape.Rectangle;
 import sage.scene.state.RenderState.RenderStateType;
@@ -84,6 +85,7 @@ public class AwesomeGame extends BaseGame {
 	private OrbitCameraController cam1Controller;
 	private Util util = new Util();
 	private int playerChickens = 0;
+	private int playerScore = 0;
 	private Group treasures;
 	private String configFile = "config.js";
 	private TerrainBlock terrain;
@@ -105,16 +107,17 @@ public class AwesomeGame extends BaseGame {
 	private IPhysicsEngine physicsEngine;
 	private IPhysicsObject chickenP, groundP;
 
-	private TriMesh chicken;
+	private TriMesh activeChicken;
 
 	private boolean singlePlayer = true;
 
 	// audio
 	private IAudioManager audioManager;
-	private Sound waterSound, backgroundMusic;
-	private AudioResource resource1, resource2;
+	private Sound waterSound, backgroundMusic, squawkSound;
+	private AudioResource resource1, resource2, resource3;
 
 	private Rectangle waterPlane;
+	private Cube bucketBox;
 
 	public AwesomeGame() {
 		super();
@@ -171,16 +174,23 @@ public class AwesomeGame extends BaseGame {
 
 		resource1 = audioManager.createAudioResource("src/sounds/Background.wav", AudioResourceType.AUDIO_SAMPLE);
 		resource2 = audioManager.createAudioResource("src/sounds/Ocean.wav", AudioResourceType.AUDIO_SAMPLE);
+		resource3 = audioManager.createAudioResource("src/sounds/squawk.wav", AudioResourceType.AUDIO_SAMPLE);
 
 		backgroundMusic = new Sound(resource1, SoundType.SOUND_MUSIC, 30, true);
 		waterSound = new Sound(resource2, SoundType.SOUND_EFFECT, 60, true);
+		squawkSound = new Sound(resource3, SoundType.SOUND_EFFECT, 100, false);
 
 		backgroundMusic.initialize(audioManager);
 		waterSound.initialize(audioManager);
+		squawkSound.initialize(audioManager);
 
 		waterSound.setMaxDistance(1.0f);
 		waterSound.setMinDistance(0.5f);
 		waterSound.setRollOff(0.75f);
+		
+		squawkSound.setMaxDistance(1.0f);
+		squawkSound.setMinDistance(0.5f);
+		squawkSound.setRollOff(0.75f);
 
 		waterSound.setLocation(new Point3D(0, 0, 0));
 
@@ -228,32 +238,40 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	public void launchChicken() {
-		
 		if(getChickenCount() > 0){
 			Vector3D playerLocation = getPlayerPosition();
 			
-			OBJLoader loader = new OBJLoader();
-			TriMesh model = loader.loadModel("chicken.obj");
-			Chicken chicken = new Chicken(model);
 			
-			chicken.getModel().translate((float) playerLocation.getX(), (float) playerLocation.getY(), (float) playerLocation.getZ());
-			addGameWorldObject(chicken.getModel());
+			OBJLoader loader = new OBJLoader();
+			activeChicken = loader.loadModel("chicken.obj");
+			activeChicken.scale(0.02f, 0.02f, 0.02f);
+			activeChicken.translate((float) playerLocation.getX(), (float) playerLocation.getY(), (float) playerLocation.getZ());
+			addGameWorldObject(activeChicken);
+			
+			Vector3D chickenLocation = activeChicken.getLocalTranslation().getCol(3);
+			Point3D chickenPosition = new Point3D(chickenLocation.getX(), chickenLocation.getY(), chickenLocation.getZ());
 
-			float mass = 1.0f;
+			float mass = 1.0f * 2;
 			IPhysicsObject chickenP;
-			chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getModel().getLocalTranslation().getValues(), 0.0f);
-
-			chickenP.setBounciness(0.9f);
-			float[] vel = { 0, 1.0f, 0.0f };
+			chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, activeChicken.getLocalTranslation().getValues(), 0.2f);
+			chickenP.setBounciness(0.1f);
+			float[] vel = { 0, 1.0f, 0.5f };
 			chickenP.setLinearVelocity(vel);
 			chickenP.setSleepThresholds(0.5f, 0.5f);
-			chicken.setPhysicsObject(chickenP);
+			activeChicken.setPhysicsObject(chickenP);
+			
 
-			new Timer().schedule(new TimerTask() {
-				public void run() {
-					// removeGameWorldObject(chicken);
-				}
-			}, 2000);
+//			new Timer().schedule(new TimerTask() {
+//				public void run() {
+//					// removeGameWorldObject(chicken);
+//				}
+//			}, 2000);
+			
+			squawkSound.setLocation(chickenPosition);
+			squawkSound.play();
+			if(playerChickens > 0){
+				playerChickens--;
+			}
 		}
 
 
@@ -377,11 +395,18 @@ public class AwesomeGame extends BaseGame {
 
 	private void createChickens() {
 		for(int i = 0; i < 20; i++){
-			OBJLoader loader = new OBJLoader();
-			TriMesh model = loader.loadModel("chicken.obj");
-			Chicken chicken = new Chicken(model);
-			chicken.setRandomLocation();
-			addGameWorldObject(chicken.getModel());
+//			OBJLoader loader = new OBJLoader();
+//			TriMesh model = loader.loadModel("chicken.obj");
+//			Chicken chicken = new Chicken(model);
+//			chicken.setRandomLocation();
+//			addGameWorldObject(chicken.getModel());
+			Chicken chicken = new Chicken();
+			Random r = new Random();
+			float x = r.nextInt(15) + 25;
+			float y = 1.5f;
+			float z = r.nextInt(15) + 25;
+			chicken.translate(x, y, z);
+			addGameWorldObject(chicken);
 		}
 	}
 
@@ -452,6 +477,19 @@ public class AwesomeGame extends BaseGame {
 
 		// add chickens
 		createChickens();
+		
+		// add bucket
+		OBJLoader loader = new OBJLoader();
+		TriMesh bucket = loader.loadModel("bucket.obj");
+		bucket.scale(0.5f, 0.5f, 0.5f);
+		bucket.translate(30, 2.8f, 30);
+		addGameWorldObject(bucket);
+		
+		// bucket collision box
+		bucketBox = new Cube();
+		bucketBox.scale(0.25f,0.25f,0.25f);
+		bucketBox.translate(30, 2.5f, 30);
+		addGameWorldObject(bucketBox);
 	}
 
 	private TerrainBlock createTerrainBlock(AbstractHeightMap heightMap) {
@@ -512,17 +550,31 @@ public class AwesomeGame extends BaseGame {
 			}
 		}
 
+		player.updateWorldBound();
 		for (SceneNode s : getGameWorld()) {
 			if (s instanceof Chicken) {
-				ICollectible collectible = (ICollectible) s;
-				System.out.println(collectible.worldBound());
+				ICollectible collectible = (ICollectible) s;				
 				if (collectible.worldBound().intersects(player.getWorldBound())) {
 					playerChickens++;
-//					CollectEvent collect = new CollectEvent(player1Treasures);
-//					eventManager.triggerEvent(collect);
 					removeGameWorldObject((SceneNode) collectible);
 					break;
 				}
+				
+			}
+		}
+		
+
+		
+		if(activeChicken != null){
+//			squawkSound.setLocation(getChickenPosition(activeChicken));
+			if(bucketBox.getWorldBound().contains(getChickenPosition(activeChicken))){
+//				CollectEvent collect = new CollectEvent(playerChickens++);
+//				eventManager.triggerEvent(collect);
+				
+				scoreHUD1.updateScore(++playerScore);
+				
+				removeGameWorldObject((SceneNode) activeChicken);
+				activeChicken = null;
 			}
 		}
 
@@ -625,6 +677,11 @@ public class AwesomeGame extends BaseGame {
 	public Vector3D getPlayerPosition() {
 		Vector3D position = player.getWorldTranslation().getCol(3);
 		return new Vector3D(position.getX(), position.getY(), position.getZ());
+	}
+	
+	public Point3D getChickenPosition(TriMesh chicken){
+		Vector3D position = chicken.getLocalTranslation().getCol(3);
+		return new Point3D(position.getX(), position.getY(), position.getZ());
 	}
 
 	public void addChicken(TriMesh chicken) {
