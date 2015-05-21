@@ -108,6 +108,7 @@ public class AwesomeGame extends BaseGame {
 	private IPhysicsObject chickenP, groundP;
 
 	private TriMesh activeChicken;
+	private Group chickens;
 
 	private boolean singlePlayer = true;
 
@@ -244,7 +245,7 @@ public class AwesomeGame extends BaseGame {
 			
 			OBJLoader loader = new OBJLoader();
 			activeChicken = loader.loadModel("chicken.obj");
-			activeChicken.scale(0.02f, 0.02f, 0.02f);
+			activeChicken.scale(0.05f, 0.05f, 0.05f);
 			activeChicken.translate((float) playerLocation.getX(), (float) playerLocation.getY(), (float) playerLocation.getZ());
 			addGameWorldObject(activeChicken);
 			
@@ -395,20 +396,21 @@ public class AwesomeGame extends BaseGame {
 	// }
 
 	private void createChickens() {
+		chickens = new Group();
+		
 		for(int i = 0; i < 20; i++){
-//			OBJLoader loader = new OBJLoader();
-//			TriMesh model = loader.loadModel("chicken.obj");
-//			Chicken chicken = new Chicken(model);
-//			chicken.setRandomLocation();
-//			addGameWorldObject(chicken.getModel());
-			Chicken chicken = new Chicken();
+			OBJLoader loader = new OBJLoader();
+			TriMesh chicken = loader.loadModel("chicken.obj");
 			Random r = new Random();
 			float x = r.nextInt(15) + 25;
 			float y = 1.5f;
 			float z = r.nextInt(15) + 25;
 			chicken.translate(x, y, z);
-			addGameWorldObject(chicken);
+			chicken.scale(.05f, .05f, .05f);
+			chickens.addChild(chicken);
 		}
+		
+		addGameWorldObject(chickens);
 	}
 
 	private void createPlayerHUDs() {
@@ -560,14 +562,18 @@ public class AwesomeGame extends BaseGame {
 
 		player.updateWorldBound();
 		for (SceneNode s : getGameWorld()) {
-			if (s instanceof Chicken) {
-				ICollectible collectible = (ICollectible) s;				
-				if (collectible.worldBound().intersects(player.getWorldBound())) {
-					playerChickens++;
-					removeGameWorldObject((SceneNode) collectible);
-					break;
-				}
+			if (s instanceof Group) {
+//				ICollectible collectible = (ICollectible) s;
+				Iterator<SceneNode> chickenIt = ((Group)s).iterator();
 				
+				while (chickenIt.hasNext()) {
+					SceneNode c = chickenIt.next();
+					if (c.getWorldBound().intersects(player.getWorldBound())) {
+						playerChickens++;
+						((Group) s).removeChild(c);
+						break;
+					}
+				}
 			}
 		}
 		
