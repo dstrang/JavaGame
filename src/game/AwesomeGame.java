@@ -110,6 +110,7 @@ public class AwesomeGame extends BaseGame {
 	private TriMesh activeChicken;
 
 	private boolean singlePlayer = true;
+	private boolean fullscreen = true;
 
 	// audio
 	private IAudioManager audioManager;
@@ -282,7 +283,7 @@ public class AwesomeGame extends BaseGame {
 	// }
 
 	private IDisplaySystem createDisplaySystem() {
-		display = new FSDisplaySystem(800, 600, 24, 20, false, "sage.renderer.jogl.JOGLRenderer");
+		display = new FSDisplaySystem(800, 600, 24, 20, fullscreen, "sage.renderer.jogl.JOGLRenderer");
 		System.out.println("\nWaiting for display creation...");
 
 		int count = 0;
