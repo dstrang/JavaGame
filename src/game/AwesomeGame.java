@@ -4,10 +4,10 @@ import graphicslib3D.Matrix3D;
 import graphicslib3D.Point3D;
 import graphicslib3D.Vector3D;
 import input.ForceQuit;
-import input.Jump;
 import input.LaunchChicken;
 import input.MoveX;
 import input.MoveZ;
+import interfaces.ICollectible;
 
 import java.awt.Color;
 import java.io.FileNotFoundException;
@@ -18,8 +18,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -29,8 +27,8 @@ import net.java.games.input.Component.Identifier;
 import networking.GameClient;
 import networking.GameServer;
 import objects.Avatar;
+import objects.Chicken;
 import objects.ScoreHUD;
-import physics.PhysicsManager;
 import sage.app.BaseGame;
 import sage.audio.AudioManagerFactory;
 import sage.audio.AudioResource;
@@ -85,7 +83,7 @@ public class AwesomeGame extends BaseGame {
 	private ScoreHUD scoreHUD1;
 	private OrbitCameraController cam1Controller;
 	private Util util = new Util();
-	private int player1Treasures = 0;
+	private int playerChickens = 0;
 	private Group treasures;
 	private String configFile = "config.js";
 	private TerrainBlock terrain;
@@ -216,45 +214,49 @@ public class AwesomeGame extends BaseGame {
 		groundP = physicsEngine.addStaticPlaneObject(physicsEngine.nextUID(), terrain.getWorldTransform().getValues(), up, 0.0f);
 		groundP.setBounciness(1.0f);
 		groundP.setDamping(1.0f, 0.5f);
-//		groundP.setSleepThresholds(1.0f, 1.0f);
+		// groundP.setSleepThresholds(1.0f, 1.0f);
 		terrain.setPhysicsObject(groundP);
 
-		float mass = 1.0f;
-		chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getWorldTransform().getValues(), 0.0f);
-		chickenP.setBounciness(0.9f);
-		float[] vel = {0, 0, 0.5f};
-//		chickenP.setAngularVelocity(vel);
-		chickenP.setLinearVelocity(vel);
-		chickenP.setSleepThresholds(0.5f, 0.5f);
-		chicken.setPhysicsObject(chickenP);
+//		float mass = 1.0f;
+//		chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getWorldTransform().getValues(), 0.0f);
+//		chickenP.setBounciness(0.9f);
+//		float[] vel = { 0, 0, 0.5f };
+//		// chickenP.setAngularVelocity(vel);
+//		chickenP.setLinearVelocity(vel);
+//		chickenP.setSleepThresholds(0.5f, 0.5f);
+//		chicken.setPhysicsObject(chickenP);
 	}
-	
-	public void launchChicken(){
-		Vector3D playerLocation = getPlayerPosition();
-		OBJLoader loader = new OBJLoader();
-		final TriMesh chicken = loader.loadModel("chicken.obj");
-		chicken.scale(0.02f, 0.02f, 0.02f);
-		chicken.translate((float)playerLocation.getX(), (float)playerLocation.getY(), (float)playerLocation.getZ());
-		chicken.updateRenderStates();
-		chicken.updateLocalBound();
-		addGameWorldObject(chicken);
-		
-		float mass = 1.0f;
-		IPhysicsObject chickenP;
-		chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getLocalTranslation().getValues(), 0.0f);
 
-		chickenP.setBounciness(0.9f);
-		float[] vel = {0, 1.0f, 0.5f};
-		chickenP.setLinearVelocity(vel);
-		chickenP.setSleepThresholds(0.5f, 0.5f);
-		chicken.setPhysicsObject(chickenP);
+	public void launchChicken() {
 		
-		new Timer().schedule(new TimerTask(){
-		    public void run(){
-//				removeGameWorldObject(chicken);
-		    }
-		}, 2000 );
-		
+		if(getChickenCount() > 0){
+			Vector3D playerLocation = getPlayerPosition();
+			
+			OBJLoader loader = new OBJLoader();
+			TriMesh model = loader.loadModel("chicken.obj");
+			Chicken chicken = new Chicken(model);
+			
+			chicken.getModel().translate((float) playerLocation.getX(), (float) playerLocation.getY(), (float) playerLocation.getZ());
+			addGameWorldObject(chicken.getModel());
+
+			float mass = 1.0f;
+			IPhysicsObject chickenP;
+			chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getModel().getLocalTranslation().getValues(), 0.0f);
+
+			chickenP.setBounciness(0.9f);
+			float[] vel = { 0, 1.0f, 0.0f };
+			chickenP.setLinearVelocity(vel);
+			chickenP.setSleepThresholds(0.5f, 0.5f);
+			chicken.setPhysicsObject(chickenP);
+
+			new Timer().schedule(new TimerTask() {
+				public void run() {
+					// removeGameWorldObject(chicken);
+				}
+			}, 2000);
+		}
+
+
 	}
 
 	// public PhysicsManager getPhysicsManager(){
@@ -316,9 +318,9 @@ public class AwesomeGame extends BaseGame {
 
 	private void createPlayers() {
 
-		//player = new Avatar();
+		// player = new Avatar();
 		player = createAvatar();
-		//player = createAvatar("src/images/jajalien1_top.jpg");
+		// player = createAvatar("src/images/jajalien1_top.jpg");
 
 		addGameWorldObject(player);
 		camera1 = new JOGLCamera(renderer);
@@ -326,7 +328,7 @@ public class AwesomeGame extends BaseGame {
 		camera1.setViewport(0.0, 1.0, 0.0, 1.0);
 		createPlayerHUDs();
 	}
-	
+
 	private Model3DTriMesh createAvatar() {
 		OgreXMLParser loader = new OgreXMLParser();
 		Model3DTriMesh character = new Avatar();
@@ -335,15 +337,14 @@ public class AwesomeGame extends BaseGame {
 			model.updateGeometricState(0, true);
 			java.util.Iterator<SceneNode> modelIterator = model.iterator();
 			character = (Model3DTriMesh) modelIterator.next();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 		character.scale(0.2f, 0.2f, 0.2f);
 		character.translate(25, 0.5f, 25);
 		character.rotate(45, new Vector3D(0, 1, 0));
-		
+
 		Texture p1Texture = TextureManager.loadTexture2D("src/images/jajalien1_top.jpg");
 		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
 		playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
@@ -352,35 +353,36 @@ public class AwesomeGame extends BaseGame {
 		model.setRenderState(playerTextureState);
 		model.updateRenderStates();
 		model.updateLocalBound();
-		
+
 		return character;
 	}
 
-//	private TriMesh createAvatar(String textureFile) {
-//		OBJLoader loader = new OBJLoader();
-//		TriMesh model = loader.loadModel("character.obj");
-//		model.scale(0.2f, 0.2f, 0.2f);
-//		model.rotate(45, new Vector3D(0, 1, 0));
-//		Texture p1Texture = TextureManager.loadTexture2D(textureFile);
-//		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
-//		TextureState playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
-//		playerTextureState.setTexture(p1Texture, 0);
-//		playerTextureState.setEnabled(true);
-//		model.setRenderState(playerTextureState);
-//		model.updateRenderStates();
-//		model.updateLocalBound();
-//
-//		return model;
-//	}
+	// private TriMesh createAvatar(String textureFile) {
+	// OBJLoader loader = new OBJLoader();
+	// TriMesh model = loader.loadModel("character.obj");
+	// model.scale(0.2f, 0.2f, 0.2f);
+	// model.rotate(45, new Vector3D(0, 1, 0));
+	// Texture p1Texture = TextureManager.loadTexture2D(textureFile);
+	// p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
+	// TextureState playerTextureState = (TextureState)
+	// renderer.createRenderState(RenderStateType.Texture);
+	// playerTextureState.setTexture(p1Texture, 0);
+	// playerTextureState.setEnabled(true);
+	// model.setRenderState(playerTextureState);
+	// model.updateRenderStates();
+	// model.updateLocalBound();
+	//
+	// return model;
+	// }
 
-	private TriMesh createChicken() {
-		OBJLoader loader = new OBJLoader();
-		TriMesh model = loader.loadModel("chicken.obj");
-		model.scale(0.02f, 0.02f, 0.02f);
-		model.updateRenderStates();
-		model.updateLocalBound();
-
-		return model;
+	private void createChickens() {
+		for(int i = 0; i < 20; i++){
+			OBJLoader loader = new OBJLoader();
+			TriMesh model = loader.loadModel("chicken.obj");
+			Chicken chicken = new Chicken(model);
+			chicken.setRandomLocation();
+			addGameWorldObject(chicken.getModel());
+		}
 	}
 
 	private void createPlayerHUDs() {
@@ -449,9 +451,7 @@ public class AwesomeGame extends BaseGame {
 		addGameWorldObject(waterPlane);
 
 		// add chickens
-		chicken = createChicken();
-		chicken.translate(25, 1.5f, 25);
-		addGameWorldObject(chicken);
+		createChickens();
 	}
 
 	private TerrainBlock createTerrainBlock(AbstractHeightMap heightMap) {
@@ -507,23 +507,24 @@ public class AwesomeGame extends BaseGame {
 				translateVec = mat.getCol(3);
 				rotateVec = mat.getCol(1);
 				s.getLocalTranslation().setCol(3, translateVec);
-//				s.getLocalRotation().setCol(1, rotateVec);
+				// s.getLocalRotation().setCol(1, rotateVec);
 				// should also get and apply rotation
 			}
 		}
 
-		// for (SceneNode s : getGameWorld()) {
-		// if (s instanceof ICollectible) {
-		// ICollectible collectible = (ICollectible) s;
-		// if (collectible.worldBound().intersects(player1.getWorldBound())) {
-		// player1Treasures++;
-		// CollectEvent collect = new CollectEvent(player1Treasures);
-		// eventManager.triggerEvent(collect);
-		// removeGameWorldObject((SceneNode) collectible);
-		// break;
-		// }
-		// }
-		// }
+		for (SceneNode s : getGameWorld()) {
+			if (s instanceof Chicken) {
+				ICollectible collectible = (ICollectible) s;
+				System.out.println(collectible.worldBound());
+				if (collectible.worldBound().intersects(player.getWorldBound())) {
+					playerChickens++;
+//					CollectEvent collect = new CollectEvent(player1Treasures);
+//					eventManager.triggerEvent(collect);
+					removeGameWorldObject((SceneNode) collectible);
+					break;
+				}
+			}
+		}
 
 		if (terrain.getWorldBound().intersects(player.getWorldBound())) {
 			Point3D avLoc = new Point3D(player.getLocalTranslation().getCol(3));
@@ -538,21 +539,25 @@ public class AwesomeGame extends BaseGame {
 
 		Vector3D playerPosition = getPlayerPosition();
 		if (playerPosition.getY() < 0.5f) {
-//			player.respawn();
+			// player.respawn();
 		}
 
 		scoreHUD1.updateTime(elapsedTime);
 
 		cam1Controller.update(elapsedTime);
-		
+
 		player.updateAnimation(elapsedTime);
-		
-		//cheap way to stop animation when not walking?
-//		if (!player.isWalking())
-//			player.stopAnimation();
-//		player.setWalking(false);
+
+		// cheap way to stop animation when not walking?
+		// if (!player.isWalking())
+		// player.stopAnimation();
+		// player.setWalking(false);
 
 		super.update(elapsedTime);
+	}
+	
+	private int getChickenCount(){
+		return playerChickens;
 	}
 
 	private void initConfig() {
@@ -621,8 +626,8 @@ public class AwesomeGame extends BaseGame {
 		Vector3D position = player.getWorldTranslation().getCol(3);
 		return new Vector3D(position.getX(), position.getY(), position.getZ());
 	}
-	
-	public void addChicken(TriMesh chicken){
+
+	public void addChicken(TriMesh chicken) {
 		addGameWorldObject(chicken);
 	}
 
@@ -632,7 +637,7 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	public TriMesh addGhostToGame(float x, float y, float z) {
-//		TriMesh ghost = createAvatar("src/images/jajalien1_left.jpg");
+		// TriMesh ghost = createAvatar("src/images/jajalien1_left.jpg");
 		Model3DTriMesh ghost = createAvatar();
 		ghost.translate(x, y, z);
 		addGameWorldObject(ghost);
