@@ -47,12 +47,14 @@ import sage.input.IInputManager;
 import sage.input.InputManager;
 import sage.input.action.IAction;
 import sage.model.loader.OBJLoader;
+import sage.model.loader.ogreXML.OgreXMLParser;
 import sage.networking.IGameConnection.ProtocolType;
 import sage.physics.IPhysicsEngine;
 import sage.physics.IPhysicsObject;
 import sage.physics.PhysicsEngineFactory;
 import sage.renderer.IRenderer;
 import sage.scene.Group;
+import sage.scene.Model3DTriMesh;
 import sage.scene.SceneNode;
 import sage.scene.SkyBox;
 import sage.scene.TriMesh;
@@ -89,8 +91,9 @@ public class AwesomeGame extends BaseGame {
 	private TerrainBlock terrain;
 	// private HillHeightMap heightMap;
 
-	// private TriMesh player;
-	private Avatar player;
+	private Model3DTriMesh player;
+	private Group model;
+	// private Avatar player;
 
 	private TextureState playerTextureState;
 	private static GameServer GameServer;
@@ -239,6 +242,7 @@ public class AwesomeGame extends BaseGame {
 		float mass = 1.0f;
 		IPhysicsObject chickenP;
 		chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getLocalTranslation().getValues(), 0.0f);
+
 		chickenP.setBounciness(0.9f);
 		float[] vel = {0, 1.0f, 0.5f};
 		chickenP.setLinearVelocity(vel);
@@ -312,9 +316,9 @@ public class AwesomeGame extends BaseGame {
 
 	private void createPlayers() {
 
-		player = new Avatar();
-
-		// player = createAvatar("src/images/jajalien1_top.jpg");
+		//player = new Avatar();
+		player = createAvatar();
+		//player = createAvatar("src/images/jajalien1_top.jpg");
 
 		addGameWorldObject(player);
 		camera1 = new JOGLCamera(renderer);
@@ -322,23 +326,52 @@ public class AwesomeGame extends BaseGame {
 		camera1.setViewport(0.0, 1.0, 0.0, 1.0);
 		createPlayerHUDs();
 	}
-
-	private TriMesh createAvatar(String textureFile) {
-		OBJLoader loader = new OBJLoader();
-		TriMesh model = loader.loadModel("character.obj");
-		model.scale(0.2f, 0.2f, 0.2f);
-		model.rotate(45, new Vector3D(0, 1, 0));
-		Texture p1Texture = TextureManager.loadTexture2D(textureFile);
+	
+	private Model3DTriMesh createAvatar() {
+		OgreXMLParser loader = new OgreXMLParser();
+		Model3DTriMesh character = new Avatar();
+		try {
+			model = loader.loadModel("character.mesh.xml", "grass_mat.material", "character.skeleton.xml");
+			model.updateGeometricState(0, true);
+			java.util.Iterator<SceneNode> modelIterator = model.iterator();
+			character = (Model3DTriMesh) modelIterator.next();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		character.scale(0.2f, 0.2f, 0.2f);
+		character.translate(25, 0.5f, 25);
+		character.rotate(45, new Vector3D(0, 1, 0));
+		
+		Texture p1Texture = TextureManager.loadTexture2D("src/images/jajalien1_top.jpg");
 		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
-		TextureState modelTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
-		modelTextureState.setTexture(p1Texture, 0);
-		modelTextureState.setEnabled(true);
-		model.setRenderState(modelTextureState);
+		playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
+		playerTextureState.setTexture(p1Texture, 0);
+		playerTextureState.setEnabled(true);
+		model.setRenderState(playerTextureState);
 		model.updateRenderStates();
 		model.updateLocalBound();
-
-		return model;
+		
+		return character;
 	}
+
+//	private TriMesh createAvatar(String textureFile) {
+//		OBJLoader loader = new OBJLoader();
+//		TriMesh model = loader.loadModel("character.obj");
+//		model.scale(0.2f, 0.2f, 0.2f);
+//		model.rotate(45, new Vector3D(0, 1, 0));
+//		Texture p1Texture = TextureManager.loadTexture2D(textureFile);
+//		p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
+//		TextureState playerTextureState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
+//		playerTextureState.setTexture(p1Texture, 0);
+//		playerTextureState.setEnabled(true);
+//		model.setRenderState(playerTextureState);
+//		model.updateRenderStates();
+//		model.updateLocalBound();
+//
+//		return model;
+//	}
 
 	private TriMesh createChicken() {
 		OBJLoader loader = new OBJLoader();
@@ -497,7 +530,7 @@ public class AwesomeGame extends BaseGame {
 			float x = (float) avLoc.getX();
 			float z = (float) avLoc.getZ();
 			float terHeight = terrain.getHeight(x, z);
-			float desiredHeight = terHeight + (float) terrain.getOrigin().getY() + player.getSize();
+			float desiredHeight = terHeight + (float) terrain.getOrigin().getY() + 0.4f;
 			if (!Float.isNaN(desiredHeight)) {
 				player.getLocalTranslation().setElementAt(1, 3, desiredHeight);
 			}
@@ -511,6 +544,13 @@ public class AwesomeGame extends BaseGame {
 		scoreHUD1.updateTime(elapsedTime);
 
 		cam1Controller.update(elapsedTime);
+		
+		player.updateAnimation(elapsedTime);
+		
+		//cheap way to stop animation when not walking?
+//		if (!player.isWalking())
+//			player.stopAnimation();
+//		player.setWalking(false);
 
 		super.update(elapsedTime);
 	}
@@ -592,7 +632,8 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	public TriMesh addGhostToGame(float x, float y, float z) {
-		TriMesh ghost = createAvatar("src/images/jajalien1_left.jpg");
+//		TriMesh ghost = createAvatar("src/images/jajalien1_left.jpg");
+		Model3DTriMesh ghost = createAvatar();
 		ghost.translate(x, y, z);
 		addGameWorldObject(ghost);
 		return ghost;
