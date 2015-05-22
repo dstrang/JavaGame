@@ -1,54 +1,33 @@
-//
-//var serverAddress = "localhost";
-//var serverPort = 50001;
-
-
 var JavaPackages = new JavaImporter(
-		Packages.net.java.games.input.Component.Identifier,
-		Packages.sage.input.IInputManager,
-		Packages.input);
+		Packages.sage.scene.SceneNode,
+		Packages.sage.scene.SkyBox,
+		Packages.sage.scene.SkyBox.Face,
+		Packages.sage.texture.Texture,
+		Packages.sage.texture.TextureManager,
+		Packages.java.io.File
+);
 with (JavaPackages) {
+	
+	var imagesDirectory = "." + File.separator + "src" + File.separator + "images" + File.separator;
+	var size = 20;
 
-	function initInput(game, inputManager, player) {
+	// initialize skybox
+	var skybox = new SkyBox("Skybox", size, size, size);
 
-//		var serverAddress = "localhost";
-//		var serverPort = 50001;
+	// load textures
+	var northTexture = TextureManager.loadTexture2D(imagesDirectory + "ocean_front.png");
+	var southTexture = TextureManager.loadTexture2D(imagesDirectory + "ocean_back.png");
+	var eastTexture = TextureManager.loadTexture2D(imagesDirectory + "ocean_right.png");
+	var westTexture = TextureManager.loadTexture2D(imagesDirectory + "ocean_left.png");
+	var upTexture = TextureManager.loadTexture2D(imagesDirectory + "ocean_up.png");
+	var downTexture = TextureManager.loadTexture2D(imagesDirectory + "ocean_down.png");
 
-		var key = net.java.games.input.Component.Identifier.Key;
-		var axis = net.java.games.input.Component.Identifier.Axis;
-		var keypress = IInputManager.INPUT_ACTION_TYPE;
-
-		var keyboard = inputManager.getKeyboardName();
-		var gamepad = inputManager.getFirstGamepadName();
-		var forceQuit = new ForceQuit(game);
-		var moveX = new MoveX(player);
-		var moveZ = new MoveZ(player);
-		var moveXAxis = new MoveXAxis(player);
-		var moveZAxis = new MoveZAxis(player);
-		
-		var inputMap = {
-			"keyboard": [
-				{ "Key": key.A, "Action": moveX, "Keypress": keypress.REPEAT_WHILE_DOWN },
-				{ "Key": key.D, "Action": moveX, "Keypress": keypress.REPEAT_WHILE_DOWN },
-				{ "Key": key.W, "Action": moveZ, "Keypress": keypress.REPEAT_WHILE_DOWN },
-				{ "Key": key.S, "Action": moveZ, "Keypress": keypress.REPEAT_WHILE_DOWN },
-				{ "Key": key.ESCAPE, "Action": forceQuit, "Keypress": keypress.ON_PRESS_AND_RELEASE }
-			],
-			"gamepad": [
-				{ "Key": axis.X, "Action": moveXAxis, "Keypress": keypress.REPEAT_WHILE_DOWN },
-				{ "Key": axis.Y, "Action": moveZAxis, "Keypress": keypress.REPEAT_WHILE_DOWN }
-			]
-		};
-		
-		for(var input in inputMap){
-			var controller = (input === "keyboard") ? keyboard : gamepad;
-			if(controller){
-				for(var i = 0; i < inputMap[input].length; i++){
-					var map = inputMap[input][i];
-					inputManager.associateAction(controller, map.Key, map.Action, map.Keypress);
-				}
-			}
-		}
-	}
-
+	// attach textures to skybox
+	skybox.setTexture(SkyBox.Face.North, northTexture);
+	skybox.setTexture(SkyBox.Face.South, southTexture);
+	skybox.setTexture(SkyBox.Face.East, eastTexture);
+	skybox.setTexture(SkyBox.Face.West, westTexture);
+	skybox.setTexture(SkyBox.Face.Up, upTexture);
+	skybox.setTexture(SkyBox.Face.Down, downTexture);
+	
 }

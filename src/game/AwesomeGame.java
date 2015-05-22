@@ -7,7 +7,6 @@ import input.ForceQuit;
 import input.LaunchChicken;
 import input.MoveX;
 import input.MoveZ;
-import interfaces.ICollectible;
 
 import java.awt.Color;
 import java.io.FileNotFoundException;
@@ -71,61 +70,58 @@ import displays.FSDisplaySystem;
 import events.CollectEvent;
 
 public class AwesomeGame extends BaseGame {
+	
+	// managers/engines
 	private IDisplaySystem display;
 	private IInputManager inputManager;
 	private ScriptEngineManager scriptManager;
 	private ScriptEngine scriptEngine;
-	private SkyBox skybox;
-	private ICamera camera1;
 	private IRenderer renderer;
 	private IEventManager eventManager;
-	// private SceneNode player1;
-	private ScoreHUD scoreHUD1;
+
+	// camera
+	private ICamera camera1;
 	private OrbitCameraController cam1Controller;
-	private Util util = new Util();
-	private int playerChickens = 0;
-	private int playerScore = 0;
-	private Group treasures;
-	private String configFile = "config.js";
-	private TerrainBlock terrain;
-	// private HillHeightMap heightMap;
-
-	private Model3DTriMesh player;
-	private Vector3D prevPosition = new Vector3D(0, 0, 0);
-	private Group model;
-	// private Avatar player;
-
-	private TextureState playerTextureState;
-	private static GameServer GameServer;
-	private String serverAddress;
-	private int serverPort;
-	private ProtocolType serverProtocol;
-	private GameClient thisClient;
-	private boolean serverConnected;
 
 	// physics
 	private IPhysicsEngine physicsEngine;
-	private IPhysicsObject chickenP, groundP;
+	private IPhysicsObject groundP;
 
 	private TriMesh activeChicken;
 	private Group chickens;
 
+	// networking
 	private boolean singlePlayer = true;
-	private boolean fullscreen = true;
+	private boolean serverConnected;
+	private GameClient thisClient;
+	private String serverAddress;
+	private int serverPort;
+	private ProtocolType serverProtocol;
+	
+	// display
+	private boolean fullscreen = false;
 
 	// audio
 	private IAudioManager audioManager;
 	private Sound waterSound, backgroundMusic, squawkSound;
 	private AudioResource resource1, resource2, resource3;
 
+	// scene
+	private ScoreHUD scoreHUD1;
+	private SkyBox skybox;
 	private Rectangle waterPlane;
 	private Cube bucketBox;
+	private int playerChickens = 0;
+	private int playerScore = 0;
+	private TerrainBlock terrain;
+	private Model3DTriMesh player;
+	private Vector3D prevPosition = new Vector3D(0, 0, 0);
+	private Group model;
+	private TextureState playerTextureState;
+	private String configFile = "config.js";
 
 	public AwesomeGame() {
 		super();
-		// this.serverAddress = serverAddr;
-		// this.serverPort = sPort;
-		// this.serverProtocol = ProtocolType.TCP;
 	}
 
 	protected void initSystem() {
@@ -145,12 +141,12 @@ public class AwesomeGame extends BaseGame {
 
 		display.setTitle("TBD");
 
+		initConfig();
 		createScene();
 		createPlayers();
-		initInput();
-		initConfig();
 		initPhysics();
 		initAudio();
+		initInput();
 
 		if (!singlePlayer) {
 			try {
@@ -174,6 +170,7 @@ public class AwesomeGame extends BaseGame {
 			System.out.println("Audio Manager failed to initialize");
 		}
 
+		// init sound files
 		resource1 = audioManager.createAudioResource("src/sounds/Background.wav", AudioResourceType.AUDIO_SAMPLE);
 		resource2 = audioManager.createAudioResource("src/sounds/Ocean.wav", AudioResourceType.AUDIO_SAMPLE);
 		resource3 = audioManager.createAudioResource("src/sounds/squawk.wav", AudioResourceType.AUDIO_SAMPLE);
@@ -196,53 +193,35 @@ public class AwesomeGame extends BaseGame {
 
 		waterSound.setLocation(new Point3D(0, 0, 0));
 
-		// backgroundMusic.play();
 		waterSound.play();
 	}
 
 	private void initPhysics() {
 
+		// init physics engine and gravity
 		String engine = "sage.physics.JBullet.JBulletPhysicsEngine";
 		physicsEngine = PhysicsEngineFactory.createPhysicsEngine(engine);
 		physicsEngine.initSystem();
 		float[] gravity = { 0, -1f, 0 };
 		physicsEngine.setGravity(gravity);
-
 		this.createPhysicsWorld();
-
-		// physicsManager = new PhysicsManager(player);
-		//
-		// // Populate physics objects if the physics engine has been
-		// intialized.
-		// if (physicsManager.isPhysicsEngineEnabled()) {
-		// ground = physicsManager.bindGroundPhysics(terrain);
-		// player.setPhysicsObject(physicsManager.bindPhysicsProperty(player,
-		// 1.0f));
-		// }
 	}
 
 	private void createPhysicsWorld() {
+		
+		// init terrain as physics object
 		float up[] = { -0.05f, 0.95f, 0 };
 		groundP = physicsEngine.addStaticPlaneObject(physicsEngine.nextUID(), terrain.getWorldTransform().getValues(), up, 0.0f);
 		groundP.setBounciness(1.0f);
 		groundP.setDamping(1.0f, 0.5f);
-		// groundP.setSleepThresholds(1.0f, 1.0f);
 		terrain.setPhysicsObject(groundP);
-
-//		float mass = 1.0f;
-//		chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, chicken.getWorldTransform().getValues(), 0.0f);
-//		chickenP.setBounciness(0.9f);
-//		float[] vel = { 0, 0, 0.5f };
-//		// chickenP.setAngularVelocity(vel);
-//		chickenP.setLinearVelocity(vel);
-//		chickenP.setSleepThresholds(0.5f, 0.5f);
-//		chicken.setPhysicsObject(chickenP);
 	}
 
 	public void launchChicken() {
+		
+		// create and launch chicken at player position
 		if(getChickenCount() > 0){
 			Vector3D playerLocation = getPlayerPosition();
-			
 			
 			OBJLoader loader = new OBJLoader();
 			activeChicken = loader.loadModel("chicken.obj");
@@ -257,17 +236,10 @@ public class AwesomeGame extends BaseGame {
 			IPhysicsObject chickenP;
 			chickenP = physicsEngine.addSphereObject(physicsEngine.nextUID(), mass, activeChicken.getLocalTranslation().getValues(), 0.2f);
 			chickenP.setBounciness(0.1f);
-			float[] vel = { 0, 1.0f, 0.5f };
+			float[] vel = { 0, 2.0f, 1.0f };
 			chickenP.setLinearVelocity(vel);
 			chickenP.setSleepThresholds(0.5f, 0.5f);
 			activeChicken.setPhysicsObject(chickenP);
-			
-
-//			new Timer().schedule(new TimerTask() {
-//				public void run() {
-//					// removeGameWorldObject(chicken);
-//				}
-//			}, 2000);
 			
 			squawkSound.setLocation(chickenPosition);
 			squawkSound.play();
@@ -278,10 +250,6 @@ public class AwesomeGame extends BaseGame {
 
 
 	}
-
-	// public PhysicsManager getPhysicsManager(){
-	// return physicsManager;
-	// }
 
 	private IDisplaySystem createDisplaySystem() {
 		display = new FSDisplaySystem(800, 600, 24, 20, fullscreen, "sage.renderer.jogl.JOGLRenderer");
@@ -336,17 +304,15 @@ public class AwesomeGame extends BaseGame {
 		super.render();
 	}
 
+	// create avatar, camera, player HUD
 	private void createPlayers() {
-
-		// player = new Avatar();
 		player = createAvatar();
-		// player = createAvatar("src/images/jajalien1_top.jpg");
-
 		addGameWorldObject(player);
 		camera1 = new JOGLCamera(renderer);
 		camera1.setPerspectiveFrustum(45, 1, 0.01, 1000);
 		camera1.setViewport(0.0, 1.0, 0.0, 1.0);
-		createPlayerHUDs();
+		scoreHUD1 = new ScoreHUD(0.01, 0.06);
+		camera1.addToHUD(scoreHUD1);
 	}
 
 	private Model3DTriMesh createAvatar() {
@@ -378,24 +344,7 @@ public class AwesomeGame extends BaseGame {
 		return character;
 	}
 
-	// private TriMesh createAvatar(String textureFile) {
-	// OBJLoader loader = new OBJLoader();
-	// TriMesh model = loader.loadModel("character.obj");
-	// model.scale(0.2f, 0.2f, 0.2f);
-	// model.rotate(45, new Vector3D(0, 1, 0));
-	// Texture p1Texture = TextureManager.loadTexture2D(textureFile);
-	// p1Texture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
-	// TextureState playerTextureState = (TextureState)
-	// renderer.createRenderState(RenderStateType.Texture);
-	// playerTextureState.setTexture(p1Texture, 0);
-	// playerTextureState.setEnabled(true);
-	// model.setRenderState(playerTextureState);
-	// model.updateRenderStates();
-	// model.updateLocalBound();
-	//
-	// return model;
-	// }
-
+	// create 20 chickens at random positions
 	private void createChickens() {
 		chickens = new Group();
 		
@@ -414,12 +363,8 @@ public class AwesomeGame extends BaseGame {
 		addGameWorldObject(chickens);
 	}
 
-	private void createPlayerHUDs() {
-		scoreHUD1 = new ScoreHUD(0.01, 0.06);
-		camera1.addToHUD(scoreHUD1);
-	}
-
 	private void createScene() {
+		
 		// initialize skybox
 		skybox = new SkyBox("Skybox", 20.0f, 20.0f, 20.0f);
 
@@ -439,7 +384,6 @@ public class AwesomeGame extends BaseGame {
 		skybox.setTexture(SkyBox.Face.Up, upTexture);
 		skybox.setTexture(SkyBox.Face.Down, downTexture);
 		addGameWorldObject(skybox);
-		eventManager.addListener(scoreHUD1, CollectEvent.class);
 
 		// add axes
 		Point3D origin = new Point3D(0, 0, 0);
@@ -453,21 +397,16 @@ public class AwesomeGame extends BaseGame {
 		addGameWorldObject(yAxis);
 		addGameWorldObject(zAxis);
 
+		// create terrain
 		ImageBasedHeightMap heightMap = new ImageBasedHeightMap("./src/images/island.jpg");
-		// HillHeightMap heightMap = new HillHeightMap(100, 10, 20.0f, 21.0f,
-		// (byte) 1);
-		// heightMap.setHeightScale(1f);
 		terrain = createTerrainBlock(heightMap);
 		TextureState grassState;
 		Texture grassTexture = TextureManager.loadTexture2D("src/images/grass.jpg");
 		grassTexture.setApplyMode(sage.texture.Texture.ApplyMode.Replace);
-
 		grassState = (TextureState) renderer.createRenderState(RenderStateType.Texture);
-
 		grassState.setTexture(grassTexture, 0);
 		grassState.setEnabled(true);
 		terrain.setRenderState(grassState);
-
 		addGameWorldObject(terrain);
 
 		// add water
@@ -505,7 +444,6 @@ public class AwesomeGame extends BaseGame {
 		String name = "terrain" + heightMap.getClass().getSimpleName();
 		TerrainBlock terrain = new TerrainBlock(name, terrainSize, terrainScale, heightMap.getHeightData(), terrainOrigin);
 		return terrain;
-
 	}
 
 	private void initInput() {
@@ -544,29 +482,23 @@ public class AwesomeGame extends BaseGame {
 			thisClient.processPackets();
 		}
 
-		// physicsManager.updatePhysicsState(getGameWorld());
-
 		Matrix3D mat;
 		Vector3D translateVec;
-		Vector3D rotateVec;
 		physicsEngine.update(20.0f);
 		for (SceneNode s : getGameWorld()) {
 			if (s.getPhysicsObject() != null) {
 				mat = new Matrix3D(s.getPhysicsObject().getTransform());
 				translateVec = mat.getCol(3);
-				rotateVec = mat.getCol(1);
+				mat.getCol(1);
 				s.getLocalTranslation().setCol(3, translateVec);
-				// s.getLocalRotation().setCol(1, rotateVec);
-				// should also get and apply rotation
 			}
 		}
 
+		// check for chicken collisions to "pick" them up
 		player.updateWorldBound();
 		for (SceneNode s : getGameWorld()) {
-			if (s instanceof Group) {
-//				ICollectible collectible = (ICollectible) s;
+			if (s instanceof Group && !s.equals("skybox")) {
 				Iterator<SceneNode> chickenIt = ((Group)s).iterator();
-				
 				while (chickenIt.hasNext()) {
 					SceneNode c = chickenIt.next();
 					if (c.getWorldBound().intersects(player.getWorldBound())) {
@@ -578,21 +510,16 @@ public class AwesomeGame extends BaseGame {
 			}
 		}
 		
-
-		
+		// check if chicken is in bucket
 		if(activeChicken != null){
-//			squawkSound.setLocation(getChickenPosition(activeChicken));
 			if(bucketBox.getWorldBound().contains(getChickenPosition(activeChicken))){
-//				CollectEvent collect = new CollectEvent(playerChickens++);
-//				eventManager.triggerEvent(collect);
-				
 				scoreHUD1.updateScore(++playerScore);
-				
 				removeGameWorldObject((SceneNode) activeChicken);
 				activeChicken = null;
 			}
 		}
 
+		// keep player on top of terrain
 		if (terrain.getWorldBound().intersects(player.getWorldBound())) {
 			Point3D avLoc = new Point3D(player.getLocalTranslation().getCol(3));
 			float x = (float) avLoc.getX();
@@ -605,23 +532,20 @@ public class AwesomeGame extends BaseGame {
 		}
 
 		Vector3D playerPosition = getPlayerPosition();
+		
+		// dont allow player in water
 		if (playerPosition.getY() < 0.5f) {
-			// player.respawn();
+			 ((Avatar) player).respawn();
 		}
-		if (playerPosition.equals(prevPosition))
+		if (playerPosition.equals(prevPosition)){
 			player.stopAnimation();
+		}
+		
+		// update time and animation
 		prevPosition = playerPosition;
-
 		scoreHUD1.updateTime(elapsedTime);
-
 		cam1Controller.update(elapsedTime);
-
 		player.updateAnimation(elapsedTime);
-
-		// cheap way to stop animation when not walking?
-		// if (!player.isWalking())
-		// player.stopAnimation();
-		// player.setWalking(false);
 
 		super.update(elapsedTime);
 	}
@@ -632,7 +556,14 @@ public class AwesomeGame extends BaseGame {
 
 	private void initConfig() {
 
-		// this.executeScript(scriptEngine, configFile);
+		// init server parameters
+		this.serverAddress = "localhost";
+		this.serverPort = 50001;
+		this.serverProtocol = ProtocolType.TCP;
+		
+		 this.executeScript(scriptEngine, configFile);
+//		 skybox = (SkyBox) scriptEngine.get("skybox");
+//		 addGameWorldObject(skybox);
 		//
 		// Invocable invocableEngine = (Invocable) scriptEngine;
 		//
@@ -647,9 +578,7 @@ public class AwesomeGame extends BaseGame {
 		// System.out.println("Null ptr exception reading " + configFile + e3);
 		// }
 
-		this.serverAddress = "localhost";
-		this.serverPort = 50001;
-		this.serverProtocol = ProtocolType.TCP;
+
 
 		// try {
 		// try {
@@ -685,13 +614,6 @@ public class AwesomeGame extends BaseGame {
 		}
 	}
 
-	public static void main(String[] args) {
-		String server = "localhost";
-		int port = 50001;
-
-		new AwesomeGame().start();
-	}
-
 	public Vector3D getPlayerPosition() {
 		Vector3D position = player.getWorldTranslation().getCol(3);
 		return new Vector3D(position.getX(), position.getY(), position.getZ());
@@ -712,7 +634,6 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	public TriMesh addGhostToGame(float x, float y, float z) {
-		// TriMesh ghost = createAvatar("src/images/jajalien1_left.jpg");
 		Model3DTriMesh ghost = createAvatar();
 		ghost.translate(x, y, z);
 		addGameWorldObject(ghost);
@@ -722,4 +643,9 @@ public class AwesomeGame extends BaseGame {
 	public void removeGhostFromGame(TriMesh ghost) {
 		removeGameWorldObject(ghost);
 	}
+	
+	public static void main(String[] args) {
+		new AwesomeGame().start();
+	}
+
 }
