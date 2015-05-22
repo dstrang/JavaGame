@@ -77,7 +77,7 @@ public class OrbitCameraController {
 		im.associateAction(cn, Identifier.Key.UP, zoomAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Key.DOWN, zoomAction, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateAction(cn, Identifier.Key.T, toggleAction, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
-		im.associateAction(cn, Identifier.Button._0, toggleAction, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
+		im.associateAction(cn, Identifier.Button._1, toggleAction, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 	}
 
 	private class OrbitAroundAction extends AbstractInputAction {

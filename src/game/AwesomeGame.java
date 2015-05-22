@@ -458,18 +458,17 @@ public class AwesomeGame extends BaseGame {
 		IAction forceQuit = new ForceQuit(this);
 		IAction launchChicken = new LaunchChicken(this, player, physicsEngine);
 
-		inputManager.associateAction(controller, Identifier.Key.A, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(controller, Identifier.Key.D, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(controller, Identifier.Key.W, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(controller, Identifier.Key.S, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(controller, Identifier.Axis.X, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		inputManager.associateAction(controller, Identifier.Axis.Y, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(keyboard, Identifier.Key.A, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(keyboard, Identifier.Key.D, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(keyboard, Identifier.Key.W, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		inputManager.associateAction(keyboard, Identifier.Key.S, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE, forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(keyboard, Identifier.Key.SPACE, launchChicken, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 		if (gamepad != null)
 		{
 			inputManager.associateAction(gamepad, Identifier.Axis.X, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 			inputManager.associateAction(gamepad, Identifier.Axis.Y, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+			inputManager.associateAction(gamepad, Identifier.Button._0, launchChicken, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
 		}
 
 		super.update(0.0f);
@@ -497,7 +496,7 @@ public class AwesomeGame extends BaseGame {
 		// check for chicken collisions to "pick" them up
 		player.updateWorldBound();
 		for (SceneNode s : getGameWorld()) {
-			if (s instanceof Group && !s.equals("skybox")) {
+			if (s instanceof Group && !s.equals(skybox)) {
 				Iterator<SceneNode> chickenIt = ((Group)s).iterator();
 				while (chickenIt.hasNext()) {
 					SceneNode c = chickenIt.next();
