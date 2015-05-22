@@ -8,6 +8,10 @@ var JavaPackages = new JavaImporter(
 );
 with (JavaPackages) {
 	
+	// networking
+	var serverAddress = "localhost";
+	var serverPort = "50001";
+	
 	var imagesDirectory = "." + File.separator + "src" + File.separator + "images" + File.separator;
 	var size = 20;
 

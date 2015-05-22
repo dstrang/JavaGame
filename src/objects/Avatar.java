@@ -46,28 +46,13 @@ public class Avatar extends Model3DTriMesh{
 		return id;
 	}
 	
-	public boolean isJumping() {
-		return isJumping;
-	}
-	
 	public boolean isWalking() {
 		return isWalking;
 	}
 	
-	public void setJumping(boolean isJumping) {
-		this.isJumping = isJumping;
-	}
 	
 	public void setWalking(boolean isWalking) {
 		this.isWalking = isWalking;
-	}
-
-	public IPhysicsObject getPhysicsObject() {
-		return physicsObject;
-	}
-
-	public void setPhysicsObject(IPhysicsObject physicsObject) {
-		this.physicsObject = physicsObject;
 	}
 	
 	public float getSize(){

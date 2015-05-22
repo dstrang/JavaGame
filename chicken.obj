@@ -1,7 +1,6 @@
 # Blender v2.74 (sub 0) OBJ File: 'Chicken from crossy road by errawr.blend1'
 # www.blender.org
 mtllib chicken.mtl
-o Crossy_Road_Chicken_Cube.4456
 v 0.186100 3.418727 1.723590
 v 0.186100 3.418727 1.223590
 v 0.686100 3.418727 1.223590
@@ -726,7 +725,6 @@ vn 0.000000 0.000000 1.000000
 vn 0.000000 -1.000000 0.000000
 vn 0.000000 1.000000 0.000000
 usemtl Chicken_color_(1)
-s off
 f 636//1 637//1 634//1 633//1
 f 645//2 646//2 644//2 643//2
 f 656//2 657//2 654//2 653//2

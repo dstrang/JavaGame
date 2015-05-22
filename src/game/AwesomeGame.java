@@ -70,7 +70,7 @@ import displays.FSDisplaySystem;
 import events.CollectEvent;
 
 public class AwesomeGame extends BaseGame {
-	
+
 	// managers/engines
 	private IDisplaySystem display;
 	private IInputManager inputManager;
@@ -97,7 +97,7 @@ public class AwesomeGame extends BaseGame {
 	private String serverAddress;
 	private int serverPort;
 	private ProtocolType serverProtocol;
-	
+
 	// display
 	private boolean fullscreen = false;
 
@@ -186,7 +186,7 @@ public class AwesomeGame extends BaseGame {
 		waterSound.setMaxDistance(1.0f);
 		waterSound.setMinDistance(0.5f);
 		waterSound.setRollOff(0.75f);
-		
+
 		squawkSound.setMaxDistance(1.0f);
 		squawkSound.setMinDistance(0.5f);
 		squawkSound.setRollOff(0.75f);
@@ -208,7 +208,7 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	private void createPhysicsWorld() {
-		
+
 		// init terrain as physics object
 		float up[] = { -0.05f, 0.95f, 0 };
 		groundP = physicsEngine.addStaticPlaneObject(physicsEngine.nextUID(), terrain.getWorldTransform().getValues(), up, 0.0f);
@@ -218,17 +218,17 @@ public class AwesomeGame extends BaseGame {
 	}
 
 	public void launchChicken() {
-		
+
 		// create and launch chicken at player position
-		if(getChickenCount() > 0){
+		if (getChickenCount() > 0) {
 			Vector3D playerLocation = getPlayerPosition();
-			
+
 			OBJLoader loader = new OBJLoader();
 			activeChicken = loader.loadModel("chicken.obj");
 			activeChicken.scale(0.05f, 0.05f, 0.05f);
 			activeChicken.translate((float) playerLocation.getX(), (float) playerLocation.getY(), (float) playerLocation.getZ());
 			addGameWorldObject(activeChicken);
-			
+
 			Vector3D chickenLocation = activeChicken.getLocalTranslation().getCol(3);
 			Point3D chickenPosition = new Point3D(chickenLocation.getX(), chickenLocation.getY(), chickenLocation.getZ());
 
@@ -240,14 +240,13 @@ public class AwesomeGame extends BaseGame {
 			chickenP.setLinearVelocity(vel);
 			chickenP.setSleepThresholds(0.5f, 0.5f);
 			activeChicken.setPhysicsObject(chickenP);
-			
+
 			squawkSound.setLocation(chickenPosition);
 			squawkSound.play();
-			if(playerChickens > 0){
+			if (playerChickens > 0) {
 				playerChickens--;
 			}
 		}
-
 
 	}
 
@@ -322,9 +321,8 @@ public class AwesomeGame extends BaseGame {
 			model = loader.loadModel("character.mesh.xml", "grass_mat.material", "character.skeleton.xml");
 			model.updateGeometricState(0, true);
 			Iterator<SceneNode> modelIterator = model.iterator();
-			character = (Model3DTriMesh)modelIterator.next();
-		}
-		catch (Exception e) {
+			character = (Model3DTriMesh) modelIterator.next();
+		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
@@ -347,8 +345,8 @@ public class AwesomeGame extends BaseGame {
 	// create 20 chickens at random positions
 	private void createChickens() {
 		chickens = new Group();
-		
-		for(int i = 0; i < 20; i++){
+
+		for (int i = 0; i < 20; i++) {
 			OBJLoader loader = new OBJLoader();
 			TriMesh chicken = loader.loadModel("chicken.obj");
 			Random r = new Random();
@@ -359,43 +357,11 @@ public class AwesomeGame extends BaseGame {
 			chicken.scale(.05f, .05f, .05f);
 			chickens.addChild(chicken);
 		}
-		
+
 		addGameWorldObject(chickens);
 	}
 
 	private void createScene() {
-		
-		// initialize skybox
-		skybox = new SkyBox("Skybox", 20.0f, 20.0f, 20.0f);
-
-		// load textures
-		Texture northTexture = TextureManager.loadTexture2D("src/images/ocean_front.png");
-		Texture southTexture = TextureManager.loadTexture2D("src/images/ocean_back.png");
-		Texture eastTexture = TextureManager.loadTexture2D("src/images/ocean_right.png");
-		Texture westTexture = TextureManager.loadTexture2D("src/images/ocean_left.png");
-		Texture upTexture = TextureManager.loadTexture2D("src/images/ocean_up.png");
-		Texture downTexture = TextureManager.loadTexture2D("src/images/ocean_down.png");
-
-		// attach textures to skybox
-		skybox.setTexture(SkyBox.Face.North, northTexture);
-		skybox.setTexture(SkyBox.Face.South, southTexture);
-		skybox.setTexture(SkyBox.Face.East, eastTexture);
-		skybox.setTexture(SkyBox.Face.West, westTexture);
-		skybox.setTexture(SkyBox.Face.Up, upTexture);
-		skybox.setTexture(SkyBox.Face.Down, downTexture);
-		addGameWorldObject(skybox);
-
-		// add axes
-		Point3D origin = new Point3D(0, 0, 0);
-		Point3D xEnd = new Point3D(100, 0, 0);
-		Point3D yEnd = new Point3D(0, 100, 0);
-		Point3D zEnd = new Point3D(0, 0, 100);
-		Line xAxis = new Line(origin, xEnd, Color.red, 2);
-		Line yAxis = new Line(origin, yEnd, Color.green, 2);
-		Line zAxis = new Line(origin, zEnd, Color.blue, 2);
-		addGameWorldObject(xAxis);
-		addGameWorldObject(yAxis);
-		addGameWorldObject(zAxis);
 
 		// create terrain
 		ImageBasedHeightMap heightMap = new ImageBasedHeightMap("./src/images/island.jpg");
@@ -420,17 +386,17 @@ public class AwesomeGame extends BaseGame {
 
 		// add chickens
 		createChickens();
-		
+
 		// add bucket
 		OBJLoader loader = new OBJLoader();
 		TriMesh bucket = loader.loadModel("bucket.obj");
 		bucket.scale(0.5f, 0.5f, 0.5f);
 		bucket.translate(30, 2.8f, 30);
 		addGameWorldObject(bucket);
-		
+
 		// bucket collision box
 		bucketBox = new Cube();
-		bucketBox.scale(0.25f,0.25f,0.25f);
+		bucketBox.scale(0.25f, 0.25f, 0.25f);
 		bucketBox.translate(30, 2.5f, 30);
 		addGameWorldObject(bucketBox);
 	}
@@ -464,8 +430,7 @@ public class AwesomeGame extends BaseGame {
 		inputManager.associateAction(keyboard, Identifier.Key.S, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(keyboard, Identifier.Key.ESCAPE, forceQuit, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		inputManager.associateAction(keyboard, Identifier.Key.SPACE, launchChicken, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
-		if (gamepad != null)
-		{
+		if (gamepad != null) {
 			inputManager.associateAction(gamepad, Identifier.Axis.X, moveX, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 			inputManager.associateAction(gamepad, Identifier.Axis.Y, moveZ, IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 			inputManager.associateAction(gamepad, Identifier.Button._0, launchChicken, IInputManager.INPUT_ACTION_TYPE.ON_PRESS_ONLY);
@@ -497,7 +462,7 @@ public class AwesomeGame extends BaseGame {
 		player.updateWorldBound();
 		for (SceneNode s : getGameWorld()) {
 			if (s instanceof Group && !s.equals(skybox)) {
-				Iterator<SceneNode> chickenIt = ((Group)s).iterator();
+				Iterator<SceneNode> chickenIt = ((Group) s).iterator();
 				while (chickenIt.hasNext()) {
 					SceneNode c = chickenIt.next();
 					if (c.getWorldBound().intersects(player.getWorldBound())) {
@@ -508,10 +473,10 @@ public class AwesomeGame extends BaseGame {
 				}
 			}
 		}
-		
+
 		// check if chicken is in bucket
-		if(activeChicken != null){
-			if(bucketBox.getWorldBound().contains(getChickenPosition(activeChicken))){
+		if (activeChicken != null) {
+			if (bucketBox.getWorldBound().contains(getChickenPosition(activeChicken))) {
 				scoreHUD1.updateScore(++playerScore);
 				removeGameWorldObject((SceneNode) activeChicken);
 				activeChicken = null;
@@ -531,15 +496,11 @@ public class AwesomeGame extends BaseGame {
 		}
 
 		Vector3D playerPosition = getPlayerPosition();
-		
-		// dont allow player in water
-		if (playerPosition.getY() < 0.5f) {
-			 ((Avatar) player).respawn();
-		}
-		if (playerPosition.equals(prevPosition)){
+
+		if (playerPosition.equals(prevPosition)) {
 			player.stopAnimation();
 		}
-		
+
 		// update time and animation
 		prevPosition = playerPosition;
 		scoreHUD1.updateTime(elapsedTime);
@@ -548,51 +509,21 @@ public class AwesomeGame extends BaseGame {
 
 		super.update(elapsedTime);
 	}
-	
-	private int getChickenCount(){
+
+	private int getChickenCount() {
 		return playerChickens;
 	}
 
 	private void initConfig() {
 
-		// init server parameters
-		this.serverAddress = "localhost";
-		this.serverPort = 50001;
-		this.serverProtocol = ProtocolType.TCP;
+		this.executeScript(scriptEngine, configFile);
+		skybox = (SkyBox) scriptEngine.get("skybox");
+		addGameWorldObject(skybox);
 		
-		 this.executeScript(scriptEngine, configFile);
-//		 skybox = (SkyBox) scriptEngine.get("skybox");
-//		 addGameWorldObject(skybox);
-		//
-		// Invocable invocableEngine = (Invocable) scriptEngine;
-		//
-		// try {
-		// invocableEngine.invokeFunction("initInput", this, inputManager,
-		// player1);
-		// } catch (ScriptException e1) {
-		// System.out.println("ScriptException in " + configFile + e1);
-		// } catch (NoSuchMethodException e2) {
-		// System.out.println("No such method exception in " + configFile + e2);
-		// } catch (NullPointerException e3) {
-		// System.out.println("Null ptr exception reading " + configFile + e3);
-		// }
-
-
-
-		// try {
-		// try {
-		// scriptEngine.eval(new java.io.FileReader(configFile));
-		// } catch (FileNotFoundException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// } catch (ScriptException e) {
-		// e.printStackTrace();
-		// }
-		//
-		// System.out.println(scriptEngine.get("serverAddress"));
-		// System.out.println(scriptEngine.get("serverPort"));
-		// System.out.println(scriptEngine.get("serverProtocol"));
+		// init server parameters
+		this.serverAddress = (String) scriptEngine.get("serverAddress");
+		this.serverPort = Integer.parseInt((String) scriptEngine.get("serverPort"));
+		this.serverProtocol = ProtocolType.TCP;
 
 		super.update(0.0f);
 	}
@@ -617,8 +548,8 @@ public class AwesomeGame extends BaseGame {
 		Vector3D position = player.getWorldTranslation().getCol(3);
 		return new Vector3D(position.getX(), position.getY(), position.getZ());
 	}
-	
-	public Point3D getChickenPosition(TriMesh chicken){
+
+	public Point3D getChickenPosition(TriMesh chicken) {
 		Vector3D position = chicken.getLocalTranslation().getCol(3);
 		return new Point3D(position.getX(), position.getY(), position.getZ());
 	}
@@ -642,7 +573,7 @@ public class AwesomeGame extends BaseGame {
 	public void removeGhostFromGame(TriMesh ghost) {
 		removeGameWorldObject(ghost);
 	}
-	
+
 	public static void main(String[] args) {
 		new AwesomeGame().start();
 	}
